@@ -1,48 +1,23 @@
 <script lang="ts">
-	const colors = ['red', 'orange', 'yellow', 'green'];
-	let selected = 'black';
+	const options = ['A', 'B', 'C', 'D'];
+	let selected = '0';
 	export let number: Number;
+		// function selection() {
+
+		// }
 </script>
 
-<h1 style="color: {selected}">{number}.Pick a colour</h1>
-<!-- <p> </p> -->
-
-<div>
-	{#each colors as color, i}
+<div class="flex flex-row h-44 w-screen justify-center my-10">
+	<p class="text-5xl mx-10 my-14 text-cyan-900">{number}</p>
+	<img src="src/images/q1.jpg" class="border-4 border-black m-10 h-44" >
+	{#each options as option}
 		<button
-			aria-current={selected === color}
-			aria-label={color}
-			style="background: {selected === color ? "black" : color}"
-			on:click={() => selected = color}
-		>{i + 1}</button>
+			on:click={() => 
+				{selected = option}
+			}
+			>
+		<img src="src/images/q1a{option}.jpg" class=" my-10 mx-3 border-4 h-44 {selected === option? "border-blue-500": "border-greay-600"} ">
+	</button>
 	{/each}
 </div>
 
-<style>
-	h1 {
-		transition: color 0.2s;
-	}
-
-	div {
-		display: grid;
-		grid-template-columns: repeat(7, 1fr);
-		grid-gap: 5px;
-		max-width: 400px;
-	}
-
-	button {
-		aspect-ratio: 1;
-		border-radius: 50%;
-		background: var(--color, #fff);
-		transform: translate(-2px,-2px);
-		filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.2));
-		transition: all 0.1s;
-	}
-
-	button[aria-current="true"] {
-		transform: none;
-		filter: none;
-		box-shadow: inset 3px 3px 4px rgba(0,0,0,0.2);
-	}
-
-</style>
