@@ -1,23 +1,83 @@
 <script lang="ts">
+    import Overlay from "../components/Overlay.svelte";
     import Question from "./Question.svelte";
+    import { tweened } from "svelte/motion";
     let number = 30;
     let cnt = 0;
-    let isOverlayOpen = false;
+    let isOverlayOpen = true;
+    let timer: any;
+
+    setInterval(() => {
+        if ($timer > 0) $timer--;
+    }, 1000);
+
+    $: minutes = Math.floor($timer / 60);
+    $: seconds = Math.floor($timer - minutes * 60);
 </script>
-<h1 class="text-3xl font-bold underline">
-    Hello world!
-</h1>
-<br>
-<br>
-<div>
-{#each Array(50) as _, index (index)}
-        <Question number={index} />    
+
+<header class={isOverlayOpen === false ? "sticky top-0" : ""}>
+    <nav class=" border-gray-200 px-4 lg:px-6 py-2.5 bg-blue-950">
+        <div
+            class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl"
+        >
+            <a href="#" class="flex items-center">
+                <span
+                    class="self-center text-2xl font-semibold whitespace-nowrap text-white"
+                    >Accuracy Test</span
+                >
+            </a>
+            <div class="flex items-center lg:order-2">
+                <a
+                    href="#"
+                    class="text-white focus:ring-4 font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-red-950"
+                    >End Test</a
+                >
+                <button
+                    data-collapse-toggle="mobile-menu-2"
+                    type="button"
+                    class="inline-flex items-center p-2 ml-1 text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+                    aria-controls="mobile-menu-2"
+                    aria-expanded="false"
+                >
+                    test butt
+                </button>
+            </div>
+            <div
+                class="hidden justify-between items-center w-full lg:flex lg:w-auto lg:order-1"
+                id="mobile-menu-2 text-white"
+            >
+                <p
+                    class="text-white p-3 rounded-3xl border-white border-2 text-lg"
+                >
+                    {isOverlayOpen ? "30 : 00" : minutes + " : " + seconds}
+                </p>
+            </div>
+        </div>
+    </nav>
+</header>
+{#each Array(10) as _, index (index)}
+    <Question number={index + 1} />
 {/each}
-</div>
-<br>
-<br>
-<br>
-<br>
-<button>
+<!-- <button class="bg-slate-600" on:click={() => {isOverlayOpen = !isOverlayOpen}}>
     turn on the overlay
-</button>
+</button> -->
+{#if isOverlayOpen}
+    {(timer = tweened(30 * 60))}
+    <Overlay>
+        <p class="text-xl mb-4">Welcome to the Accuracy Test</p>
+        <p>these arethe rules</p>
+        <p>-rule 1</p>
+        <p>-rule 2</p>
+        <p>-rule 3</p>
+        <p>{"Good luck :)"}</p>
+        <button
+            class="bg-green-800 mt-3 p-2 rounded-md text-white hover:bg-green-900"
+            on:click={() => {
+                isOverlayOpen = false;
+                timer = tweened(30 * 60);
+            }}
+        >
+            Start!
+        </button>
+    </Overlay>
+{/if}
