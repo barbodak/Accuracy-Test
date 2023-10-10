@@ -9,7 +9,7 @@
     <button on:click={()=>wasClicked = true}>
         <img src="src/images/cards/{name}.jpg" />
         {#if wasClicked === true}
-            <Overlay>
+            <Overlay canBeExited={true}>
                 <img src="src/images/cards/{name}.jpg" />
             </Overlay>
         {/if}

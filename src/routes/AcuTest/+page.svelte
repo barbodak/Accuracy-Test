@@ -63,7 +63,7 @@
 </button> -->
 {#if isOverlayOpen}
     {(timer = tweened(30 * 60))}
-    <Overlay>
+    <Overlay canBeExited={false}>
         <p class="text-xl mb-4">Welcome to the Accuracy Test</p>
         <p>these arethe rules</p>
         <p>-rule 1</p>
