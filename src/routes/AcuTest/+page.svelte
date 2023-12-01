@@ -16,7 +16,7 @@
 </script>
 
 <header class={isOverlayOpen === false ? "sticky top-0" : ""}>
-    <nav class=" border-gray-200 px-4 lg:px-6 py-2.5 bg-blue-950">
+    <nav class=" border-gray-200 px-4 lg:px-6 py-2.5 bg-blue-950 bg-blue-900">
         <div
             class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl"
         >
