@@ -1,16 +1,17 @@
 <script lang="ts">
     import Overlay from "./Overlay.svelte";
 
-    export let name: String;
+    export let id: number; 
+    let name = String.fromCharCode('A'.charCodeAt(0) + id);
     let wasClicked = false;
 </script>
 
-<div class="mx-5 my-7">
+<div >
     <button on:click={()=>wasClicked = true}>
-        <img src="src/images/cards/{name}.jpg" />
+        <img src="src/images/cards/{name}.jpg" alt={name}/>
         {#if wasClicked === true}
             <Overlay canBeExited={true}>
-                <img src="src/images/cards/{name}.jpg" />
+                <img src="src/images/cards/{name}.jpg" alt={name}/>
             </Overlay>
         {/if}
     </button>
