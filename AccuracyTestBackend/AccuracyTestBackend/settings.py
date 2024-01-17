@@ -73,14 +73,15 @@ WSGI_APPLICATION = 'AccuracyTestBackend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'farjam',
-        'USER': 'farjam',
-        'PASSWORD': 'farjamfarjamfarjam',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'NAME': 'db',
+        'USER': 'postgres',
+        'PASSWORD': 'farjamfarjam',
+        'HOST': 'localhost',
+        'PORT': '7887',
     }
 }
 
