@@ -32,10 +32,12 @@ class Account(models.Model):
     valTest_permition = models.BooleanField(editable=True, default=False)
 
     def save(self, *args, **kwargs):
-        q1 = QuizInfo.objects.create(user=self.user)
-        q2 = QuizInfo.objects.create(user=self.user)
-        AcuTest.objects.create(quiz_info=q1)
-        ValuTest.objects.create(quiz_info=q2)
+        if not ValuTest.objects.filter(quiz_info__user=self.user).exists():
+            q1 = QuizInfo.objects.create(user=self.user)
+            ValuTest.objects.create(quiz_info=q1, answers=[0] * 30)
+        if not AcuTest.objects.filter(quiz_info__user=self.user).exists():
+            q2 = QuizInfo.objects.create(user=self.user)
+            AcuTest.objects.create(quiz_info=q2, answers=[0] * 30)
         super(Account, self).save(*args, **kwargs)
 
     def __str__(self) -> str:

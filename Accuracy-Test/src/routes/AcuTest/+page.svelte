@@ -16,9 +16,14 @@
 
     let submit_promise: Promise<void>;
     function handleSubmit() {
+        // just because you feel it doesn't mean it's there
+        // tupac
+        let ans = answers.map((x) =>
+            x === "A" ? 1 : x === "B" ? 2 : x === "C" ? 3 : x === "D" ? 4 : 0
+        );
         submit_promise = submitAnswer({
-            answers: answers,
-            type: "AcuTest",
+            answers: ans,
+            quiz_type: "AcuTest",
         });
     }
     $: minutes = Math.floor($timer / 60);
@@ -66,7 +71,7 @@
     </nav>
 </header>
 {#each Array(10) as _, index (index)}
-    <Question number={index + 1} selected={answers[index]} />
+    <Question number={index + 1} bind:selected={answers[index]} />
 {/each}
 <!-- <button class="bg-slate-600" on:click={() => {isOverlayOpen = !isOverlayOpen}}>
 turn on the overlay
@@ -84,7 +89,7 @@ turn on the overlay
             class="bg-green-800 mt-3 p-2 rounded-md text-white hover:bg-green-900"
             on:click={() => {
                 isOverlayOpen = false;
-                timer = tweened(1 * 10);
+                timer = tweened(30 * 60);
             }}
         >
             Start!

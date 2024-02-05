@@ -1,15 +1,22 @@
 from knox.serializers import UserSerializer
 from rest_framework import serializers
 from django.contrib.auth.models import User, Group
-from .models import AcuTest, QuizInfo
+from .models import AcuTest, QuizInfo, ValuTest
 
 
 class AcuTestSerializer(serializers.ModelSerializer):
+    quiz_info = serializers.SlugRelatedField(
+        read_only=True, slug_field='start_time')
+
     class Meta:
         model = AcuTest
-        fields = 'answer'
+        fields = ['answers', 'quiz_info']
 
-    def update(self, instance, validated_data):
-        instance.answer = validated_data.get('answer', instance.Answer)
-        instance.save()
-        return instance
+
+class ValuTestSerializer(serializers.ModelSerializer):
+    quiz_info = serializers.SlugRelatedField(
+        read_only=True, slug_field='start_time')
+
+    class Meta:
+        model = ValuTest
+        fields = ['answers', 'quiz_info']
