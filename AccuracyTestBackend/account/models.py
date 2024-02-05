@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.db.models.enums import TextChoices
 from django.utils.translation import gettext_lazy as _
 
+from quiz.models import AcuTest, QuizInfo, ValuTest
+
 
 class Organization(models.Model):
     name = models.CharField(max_length=255)
@@ -29,6 +31,13 @@ class Account(models.Model):
     acuTest_permition = models.BooleanField(editable=True, default=False)
     valTest_permition = models.BooleanField(editable=True, default=False)
 
+    def save(self, *args, **kwargs):
+        q1 = QuizInfo.objects.create(user=self.user)
+        q2 = QuizInfo.objects.create(user=self.user)
+        AcuTest.objects.create(quiz_info=q1)
+        ValuTest.objects.create(quiz_info=q2)
+        super(Account, self).save(*args, **kwargs)
+
     def __str__(self) -> str:
-       return f'{self.first_name} {self.last_name}'
+        return f'{self.first_name} {self.last_name}'
 # Create your models here.
