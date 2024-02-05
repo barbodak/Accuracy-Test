@@ -1,6 +1,6 @@
 <script lang="ts">
 	const options = ['A', 'B', 'C', 'D'];
-	let selected = '0';
+	export let selected = '0';
 	export let number: Number;
 	const selection = function(option:string) {(selected === option)? selected = '0': selected = option};
 </script>

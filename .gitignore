@@ -5,3 +5,5 @@ env
 pycache/
 *.py[cod]
 *.env
+*.lockb
+*.lock-wscript
