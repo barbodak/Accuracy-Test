@@ -10,6 +10,7 @@
     let timer: any;
     let ti = 0;
     let answers = Array(10).fill("0");
+    let isOverlayOpen = false;
 
     onMount(async () => {
         const quiz = await retreiveQuiz({ quiz_type: "AcuTest" });
@@ -72,7 +73,10 @@
             <div class="flex items-center lg:order-2">
                 <button
                     class="text-white focus:ring-4 font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-red-950"
-                    on:click={handleSubmit}
+                    on:click={() => {
+                        handleSubmit();
+                        isOverlayOpen = true;
+                    }}
                 >
                     End Test
                 </button>
@@ -93,6 +97,28 @@
 {#each Array(10) as _, index (index)}
     <Question number={index + 1} bind:selected={answers[index]} />
 {/each}
-<!-- <button class="bg-slate-600" on:click={() => {isOverlayOpen = !isOverlayOpen}}>
-turn on the overlay
-</button> -->
+
+{#if isOverlayOpen}
+    <Overlay canBeExited={false} isTransparent={true}>
+        <p>
+            are you sure you want to end this test? your answers are
+            automatically saved and you can edit your answers until the time
+            ends
+        </p>
+        <button
+            class="bg-red-600 hover:bg-red-900 text-white font-bold py-2 px-4 rounded inline-block mt-2"
+            on:click={() => {
+                goto("/TestEnded");
+            }}
+            >End Test
+        </button>
+        <button
+            class="bg-green-600 hover:bg-green-900 text-white font-bold py-2 px-4 rounded inline-block mt-2"
+            on:click={() => {
+                isOverlayOpen = false;
+            }}
+        >
+            Continue Test</button
+        >
+    </Overlay>
+{/if}

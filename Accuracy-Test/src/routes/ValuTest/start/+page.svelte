@@ -1,6 +1,5 @@
 <script lang="ts">
     import Overlay from "../../../components/Overlay.svelte";
-    import { goto } from "$app/navigation";
     import { startQuiz } from "$lib/utils/api/quiz-apis";
     let promise: Promise<void>;
     const startQuizHandler = async () => {
@@ -11,7 +10,7 @@
     };
 </script>
 
-<Overlay canBeExited={false}>
+<Overlay isTransparent={false} canBeExited={false}>
     <p class="text-xl mb-4">Welcome to the Values Test</p>
     <p>
         VALUTEST is a test that measures your accuracy in answering questions.

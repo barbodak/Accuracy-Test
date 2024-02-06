@@ -7,8 +7,7 @@
     let cardWasUsed = Array(20).fill(false);
     let txt = "no touching yet";
     let hoveringOver = 90;
-
-    export let direction: "left" | "right" = "right";
+    let isOverlayOpen = false;
 
     function handleDragStart(event: DragEvent, cardIndex: number) {
         event.dataTransfer?.setData("cardName", cardIndex.toString());
@@ -31,6 +30,7 @@
     import { retreiveQuiz, submitAnswer } from "$lib/utils/api/quiz-apis";
     import { goto } from "$app/navigation";
     import { onMount } from "svelte";
+    import Overlay from "../../components/Overlay.svelte";
     let number = 30;
     let cnt = 0;
     let timer: any;
@@ -94,7 +94,10 @@
                 <!-- Swapped order for large screens -->
                 <button
                     class="px-4 py-2 bg-red-700 hover:bg-red-800 rounded-lg focus:outline-none"
-                    on:click={handleSubmit}
+                    on:click={() => {
+                        handleSubmit();
+                        isOverlayOpen = true;
+                    }}
                 >
                     End Test
                 </button>
@@ -169,3 +172,28 @@
         </div>
     </div>
 </body>
+
+{#if isOverlayOpen}
+    <Overlay canBeExited={false} isTransparent={true}>
+        <p>
+            are you sure you want to end this test? your answers are
+            automatically saved and you can edit your answers until the time
+            ends
+        </p>
+        <button
+            class="bg-red-600 hover:bg-red-900 text-white font-bold py-2 px-4 rounded inline-block mt-2"
+            on:click={() => {
+                goto("/TestEnded");
+            }}
+            >End Test
+        </button>
+        <button
+            class="bg-green-600 hover:bg-green-900 text-white font-bold py-2 px-4 rounded inline-block mt-2"
+            on:click={() => {
+                isOverlayOpen = false;
+            }}
+        >
+            Continue Test</button
+        >
+    </Overlay>
+{/if}

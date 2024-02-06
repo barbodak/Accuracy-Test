@@ -10,7 +10,7 @@
     };
 </script>
 
-<Overlay canBeExited={false}>
+<Overlay isTransparent={false} canBeExited={false}>
     <p class="text-xl mb-4">Welcome to the Accuracy Test</p>
     <p>ACUTEST is a test that measures your accuracy in answering questions.</p>
     <p>these arethe rules</p>

@@ -2,6 +2,7 @@
     import { goto } from "$app/navigation";
     import { retreiveAccount, retreiveQuiz } from "$lib/utils/api/quiz-apis";
     import { onMount } from "svelte";
+    import Overlay from "../components/Overlay.svelte";
     let isAcuDone = false;
     let isValuDone = false;
     let hasValPerm = false;
@@ -38,31 +39,53 @@
     });
 </script>
 
-<h1>
-    Welcome, {first_name}
-    {last_name}
-</h1>
-<h1>
-    {#if isAcuDone}
-        <h1>you have already taken the AcuTest, here are your answers</h1>
-        {#each acuAnswers as answer}
-            {answer},
-        {/each}
-    {:else if hasAcuPerm}
-        <a href="/AcuTest/start">Take the AcuTest</a>
-    {:else}
-        <p>You do not have permission to take the AcuTest</p>
-    {/if}
-</h1>
-<h1>
-    {#if isValuDone}
-        <h1>you have already taken the ValuTest, here are your answers</h1>
-        {#each valuAnswers as answer}
-            {answer},
-        {/each}
-    {:else if hasValPerm}
-        <a href="/ValuTest/start">Take the ValuTest</a>
-    {:else}
-        <p>You do not have permission to take the ValuTest</p>
-    {/if}
-</h1>
+<Overlay isTransparent={false} canBeExited={false}>
+    <h1 class="text-xl">
+        Welcome, {first_name}
+        {last_name}
+    </h1>
+    <br />
+    <br />
+    <h1>
+        {#if isAcuDone}
+            <h1 class="text-l">
+                you have already taken the AcuTest, here are your answers
+            </h1>
+
+            {#each acuAnswers as answer}
+                {answer},
+            {/each}
+        {:else if hasAcuPerm}
+            <button
+                class="bg-green-600 hover:bg-green-900 text-white font-bold py-2 px-4 rounded inline-block mt-2"
+                on:click={() => {
+                    goto("/AcuTest/start");
+                }}
+            >
+                Start AcuTest</button
+            >
+        {:else}
+            <p>You do not have permission to take the AcuTest</p>
+        {/if}
+    </h1>
+    <br />
+    <h1>
+        {#if isValuDone}
+            <h1>you have already taken the ValuTest, here are your answers</h1>
+            {#each valuAnswers as answer}
+                {answer},
+            {/each}
+        {:else if hasValPerm}
+            <button
+                class="bg-green-600 hover:bg-green-900 text-white font-bold py-2 px-4 rounded inline-block mt-2"
+                on:click={() => {
+                    goto("/ValuTest/start");
+                }}
+            >
+                Start ValuTest</button
+            >
+        {:else}
+            <p>You do not have permission to take the ValuTest</p>
+        {/if}
+    </h1>
+</Overlay>
