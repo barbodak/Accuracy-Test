@@ -13,18 +13,11 @@ from account.models import Account
 from .models import AcuTest, QuizInfo, ValuTest
 from .serializers import AcuTestSerializer, ValuTestSerializer  # , QuizInfoSerializer
 
-#
-# def startQuiz(request):
-#     print(timezone.now())
-#     quiz = QuizInfo.objects.filter(user__username='barbodak').update(
-#         start_time=timezone.now() - timedelta(hours=15))
-#     return HttpResponse(status=200)
-#
-
 
 class QuizViewSet(viewsets.ViewSet):
+
     authentication_classes = (TokenAuthentication,)
-    # permission_classes = (IsAuthenticated,)
+    ermission_classes = (IsAuthenticated,)
 
     def get_quiz(self, quiz_type, user) -> AcuTest | ValuTest | None:
         acc = Account.objects.get(user=user)
@@ -48,6 +41,7 @@ class QuizViewSet(viewsets.ViewSet):
         if quiz.quiz_info.start_time is None:
             quiz.quiz_info.start_time = timezone.now()
             quiz.quiz_info.save()
+            print(quiz.quiz_info.start_time)
             return HttpResponse(status=200)
         else:
             return HttpResponse(status=400)
@@ -64,8 +58,7 @@ class QuizViewSet(viewsets.ViewSet):
         return HttpResponse(status=200)
 
     def retrieve(self, request, quiz_type):
-        user = User.objects.get(username='ahoora')
-        quiz = self.get_quiz(quiz_type, user)
+        quiz = self.get_quiz(quiz_type, request.user)
         if quiz is None or quiz.quiz_info.start_time is None:
             return HttpResponse(status=400)
         match quiz_type:
@@ -75,3 +68,12 @@ class QuizViewSet(viewsets.ViewSet):
                 return JsonResponse(ValuTestSerializer(quiz).data)
             case _:
                 return HttpResponse(status=400)
+
+    def hasQuizEnded(self, request, quiz_type):
+        quiz = self.get_quiz(quiz_type, request.user)
+        if quiz is None or (timezone.now() - quiz.quiz_info.start_time).seconds > 60 * 5:
+            print((timezone.now() - quiz.quiz_info.start_time).seconds)
+            return HttpResponse(status=400)
+        print((timezone.now() - quiz.quiz_info.start_time).seconds)
+        print("test")
+        return HttpResponse(status=200)

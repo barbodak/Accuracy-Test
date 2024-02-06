@@ -2,14 +2,33 @@
     import Overlay from "../../components/Overlay.svelte";
     import Question from "../../components/Question.svelte";
     import { tweened } from "svelte/motion";
-    import { submitAnswer } from "$lib/utils/api/quiz-apis";
+    import { retreiveQuiz, submitAnswer } from "$lib/utils/api/quiz-apis";
     import { goto } from "$app/navigation";
+    import { onMount } from "svelte";
     let number = 30;
     let cnt = 0;
-    let isOverlayOpen = true;
     let timer: any;
+    let ti = 0;
     let answers = Array(10).fill("0");
 
+    onMount(async () => {
+        const checkQuiz;
+        const quiz = await retreiveQuiz({ quiz_type: "AcuTest" });
+
+        answers = quiz.answers.map((x: any) =>
+            x === 1 ? "A" : x === 2 ? "B" : x === 3 ? "C" : x === 4 ? "D" : "0"
+        );
+        let now = new Date();
+        let qdate = new Date(quiz.quiz_info);
+        let delta = now.valueOf() - qdate.valueOf();
+        ti = Math.floor(delta / 1000);
+        if (ti > 5 * 60) {
+            goto("/TestEnded");
+        }
+        timer = tweened(5 * 60 - ti);
+        console.log(timer);
+        console.log("f");
+    });
     setInterval(() => {
         if ($timer > 0) $timer--;
     }, 1000);
@@ -33,12 +52,13 @@
     }
     $: {
         if (seconds == 0 && minutes == 0) {
-            goto("/");
+            handleSubmit();
+            console.log("submitting");
         }
     }
 </script>
 
-<header class={isOverlayOpen === false ? "sticky top-0" : ""}>
+<header class="sticky top-0">
     <nav class=" border-gray-200 px-4 lg:px-6 py-2.5 bg-blue-950 bg-blue-900">
         <div
             class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl"
@@ -64,7 +84,7 @@
                 <p
                     class="text-white p-3 rounded-3xl border-white border-2 text-lg"
                 >
-                    {isOverlayOpen ? "30 : 00" : minutes + " : " + seconds}
+                    {minutes + " : " + seconds}
                 </p>
             </div>
         </div>
@@ -76,23 +96,3 @@
 <!-- <button class="bg-slate-600" on:click={() => {isOverlayOpen = !isOverlayOpen}}>
 turn on the overlay
 </button> -->
-{#if isOverlayOpen}
-    {(timer = tweened(1 * 60))}
-    <Overlay canBeExited={false}>
-        <p class="text-xl mb-4">Welcome to the Accuracy Test</p>
-        <p>these arethe rules</p>
-        <p>-rule 1</p>
-        <p>-rule 2</p>
-        <p>-rule 3</p>
-        <p>{"Good luck :)"}</p>
-        <button
-            class="bg-green-800 mt-3 p-2 rounded-md text-white hover:bg-green-900"
-            on:click={() => {
-                isOverlayOpen = false;
-                timer = tweened(30 * 60);
-            }}
-        >
-            Start!
-        </button>
-    </Overlay>
-{/if}

@@ -16,7 +16,6 @@ export const submitAnswer = async (data : any) => {
 }   
 
 export const startQuiz = async (data : any) => {
-    console.log("data", data);
     try {
         const url = `${BASE_API_URL}/quiz/start-quiz/${data.quiz_type}/`;
         const response = await axios({
@@ -29,6 +28,36 @@ export const startQuiz = async (data : any) => {
         console.error("Error while starting quiz", error);
     }
 }
+
+export const retreiveQuiz = async (data : any) => {
+    try {
+        const url = `${BASE_API_URL}/quiz/retrieve/${data.quiz_type}/`;
+        const response = await axios({
+            method: 'get',
+            url: url,
+        }); 
+        console.log(response);
+        return response.data;
+    } catch (error) {
+        console.error("Error while starting quiz", error);
+    }
+}
+
+export const hasQuizEnded = async (data : any) => {
+    try {
+        const url = `${BASE_API_URL}/quiz/has-quiz-ended/${data.quiz_type}/`;
+        console.log(url);
+        const response = await axios({
+            method: 'get',
+            url: url,
+        }); 
+        return false;
+    } catch (error) {
+        console.error("Error while checking if quiz has ended", error);
+        return true;
+    }
+}
+
 
 export const quizOptions = async (data : object) => { 
     try {
