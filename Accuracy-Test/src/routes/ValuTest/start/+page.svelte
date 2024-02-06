@@ -8,7 +8,6 @@
             quiz_type: "ValuTest",
         });
         await promise;
-        goto("/ValuTest");
     };
 </script>
 
@@ -29,4 +28,3 @@
         >شروع</a
     >
 </Overlay>
-

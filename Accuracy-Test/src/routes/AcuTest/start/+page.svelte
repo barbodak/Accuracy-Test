@@ -1,6 +1,5 @@
 <script lang="ts">
     import Overlay from "../../../components/Overlay.svelte";
-    import { goto } from "$app/navigation";
     import { startQuiz } from "$lib/utils/api/quiz-apis";
     let promise: Promise<void>;
     const startQuizHandler = async () => {
@@ -8,7 +7,6 @@
             quiz_type: "AcuTest",
         });
         await promise;
-        goto("/AcuTest");
     };
 </script>
 

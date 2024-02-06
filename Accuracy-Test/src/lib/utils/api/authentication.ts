@@ -14,7 +14,7 @@ export const login = async (data:object) => {
         });
         userData.update(() => response.data);
         console.log(response.data);
-        goto('/AcuTest');
+        goto('/');
         // success('you have successfully logged in');
     } catch (e) {
         console.log(e);

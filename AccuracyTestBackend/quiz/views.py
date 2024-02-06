@@ -72,8 +72,5 @@ class QuizViewSet(viewsets.ViewSet):
     def hasQuizEnded(self, request, quiz_type):
         quiz = self.get_quiz(quiz_type, request.user)
         if quiz is None or (timezone.now() - quiz.quiz_info.start_time).seconds > 60 * 5:
-            print((timezone.now() - quiz.quiz_info.start_time).seconds)
             return HttpResponse(status=400)
-        print((timezone.now() - quiz.quiz_info.start_time).seconds)
-        print("test")
         return HttpResponse(status=200)

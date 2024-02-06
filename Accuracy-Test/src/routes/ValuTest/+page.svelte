@@ -8,6 +8,8 @@
     let txt = "no touching yet";
     let hoveringOver = 90;
 
+    export let direction: "left" | "right" = "right";
+
     function handleDragStart(event: DragEvent, cardIndex: number) {
         event.dataTransfer?.setData("cardName", cardIndex.toString());
     }
@@ -26,11 +28,7 @@
     }
 
     import { tweened } from "svelte/motion";
-    import {
-        hasQuizEnded,
-        retreiveQuiz,
-        submitAnswer,
-    } from "$lib/utils/api/quiz-apis";
+    import { retreiveQuiz, submitAnswer } from "$lib/utils/api/quiz-apis";
     import { goto } from "$app/navigation";
     import { onMount } from "svelte";
     let number = 30;
@@ -39,8 +37,6 @@
     let ti = 0;
 
     onMount(async () => {
-        const checkQuiz = await hasQuizEnded({ quiz_type: "ValuTest" });
-        console.log(checkQuiz);
         const quiz = await retreiveQuiz({ quiz_type: "ValuTest" });
         answers = quiz.answers.map((x: any) => x - 1);
         answers = answers.slice(0, 20);
@@ -58,7 +54,7 @@
         console.log("f");
     });
     setInterval(() => {
-        if ($timer > 0) $timer--;
+        if ($timer > -2) $timer--;
     }, 1000);
 
     let submit_promise: Promise<void>;
@@ -83,12 +79,17 @@
             console.log("submitting");
         }
     }
+    $: {
+        if (seconds < 0 || minutes < 0) {
+            goto("/TestEnded");
+        }
+    }
 </script>
 
 <header class="fixed top-0 w-full bg-blue-900 text-white z-10">
     <nav class="container mx-auto px-6 py-3">
         <div class="flex justify-between items-center">
-            <div class="text-lg font-semibold">Accuracy Test</div>
+            <div class="text-lg font-semibold">Values Test</div>
             <div class="space-x-4 lg:order-2">
                 <!-- Swapped order for large screens -->
                 <button
@@ -131,7 +132,8 @@
         </div>
 
         <!-- Orange Main Content -->
-        <div class="w-4/5 bg-orange-200 h-screen pl-1/5">
+        <div class="w-4/5 h-screen pl-1/5">
+            <br />
             <div
                 class="grid grid-cols-5 grid-rows-4 gap-x-5 gap-y-6 h-screen p-5"
             >
@@ -152,7 +154,13 @@
                             <div
                                 class="h-full w-full flex justify-center items-center"
                             >
-                                <ValCard id={answers[index]} />
+                                <ValCard
+                                    id={answers[index]}
+                                    on:click={() => {
+                                        cardWasUsed[answers[index]] = false;
+                                        answers[index] = -1;
+                                    }}
+                                />
                             </div>
                         {/if}
                     </div>

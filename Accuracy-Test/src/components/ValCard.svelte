@@ -7,8 +7,8 @@
 </script>
 
 <div class="max-w-full max-h-full object-contain">
-    <button on:click={() => (wasClicked = true)}>
-        <img src="src/images/cards/{name}.jpg" alt={name} />
+    <button on:click>
+        <img src="/src/images/cards/{name}.jpg" alt={name} />
         {#if wasClicked === true}
             <Overlay canBeExited={true}>
                 <img src="src/images/cards/{name}.jpg" alt={name} />

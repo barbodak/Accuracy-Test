@@ -43,25 +43,9 @@ export const retreiveQuiz = async (data : any) => {
     }
 }
 
-export const hasQuizEnded = async (data : any) => {
+export const retreiveAccount = async () => { 
     try {
-        const url = `${BASE_API_URL}/quiz/has-quiz-ended/${data.quiz_type}/`;
-        console.log(url);
-        const response = await axios({
-            method: 'get',
-            url: url,
-        }); 
-        return false;
-    } catch (error) {
-        console.error("Error while checking if quiz has ended", error);
-        return true;
-    }
-}
-
-
-export const quizOptions = async (data : object) => { 
-    try {
-        const url = `${BASE_API_URL}/quiz/quiz-options/`;
+        const url = `${BASE_API_URL}/account/retrieve/`;
         const response = await axios({
             method: 'get',
             url: url,

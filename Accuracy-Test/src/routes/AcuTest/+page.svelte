@@ -12,9 +12,7 @@
     let answers = Array(10).fill("0");
 
     onMount(async () => {
-        const checkQuiz;
         const quiz = await retreiveQuiz({ quiz_type: "AcuTest" });
-
         answers = quiz.answers.map((x: any) =>
             x === 1 ? "A" : x === 2 ? "B" : x === 3 ? "C" : x === 4 ? "D" : "0"
         );
@@ -22,15 +20,12 @@
         let qdate = new Date(quiz.quiz_info);
         let delta = now.valueOf() - qdate.valueOf();
         ti = Math.floor(delta / 1000);
-        if (ti > 5 * 60) {
-            goto("/TestEnded");
-        }
         timer = tweened(5 * 60 - ti);
         console.log(timer);
         console.log("f");
     });
     setInterval(() => {
-        if ($timer > 0) $timer--;
+        if ($timer > -2) $timer--;
     }, 1000);
 
     let submit_promise: Promise<void>;
@@ -54,6 +49,11 @@
         if (seconds == 0 && minutes == 0) {
             handleSubmit();
             console.log("submitting");
+        }
+    }
+    $: {
+        if (seconds < 0 || minutes < 0) {
+            goto("/TestEnded");
         }
     }
 </script>
