@@ -1,12 +1,12 @@
-FROM node:19 AS node-build
+FROM node:18.19.0 AS node-build
 
 WORKDIR /usr/src/app
 
 COPY Accuracy-Test/package*.json ./
-RUN bun install
+RUN npm install
 
 COPY Accuracy-Test/ .
 
-RUN bun run build
+RUN npm run build
 
 ENTRYPOINT [ "/bin/sh", "-c" , "node build" ]
