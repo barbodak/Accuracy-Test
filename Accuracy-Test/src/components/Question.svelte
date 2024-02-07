@@ -10,7 +10,7 @@
 <div class="flex flex-row h-44 w-screen justify-center my-10">
 	<!-- <p class="text-5xl mx-10 my-14 text-cyan-900">{number}</p> -->
 	<img
-		src="/src/images/quiz/{number}.png"
+		src="/images/quiz/{number}.png"
 		class="border-4 border-black m-10 h-44"
 		alt={"Question Number " + number.toString}
 	/>
@@ -21,7 +21,7 @@
 			}}
 		>
 			<img
-				src="/src/images/quiz/{number}{option}.png"
+				src="/images/quiz/{number}{option}.png"
 				class=" my-10 mx-3 border-4 h-44 {selected === option
 					? 'border-blue-500'
 					: 'border-greay-600'} "

@@ -8,10 +8,10 @@
 
 <div class="max-w-full max-h-full object-contain">
     <button on:click>
-        <img src="/src/images/cards/{name}.jpg" alt={name} />
+        <img src="/images/cards/{name}.jpg" alt={name} />
         {#if wasClicked === true}
-            <Overlay canBeExited={true}>
-                <img src="src/images/cards/{name}.jpg" alt={name} />
+            <Overlay canBeExited={true} isTransparent{false}>
+                <img src="/images/cards/{name}.jpg" alt={name} />
             </Overlay>
         {/if}
     </button>
