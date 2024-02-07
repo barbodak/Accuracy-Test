@@ -35,7 +35,7 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split()
 
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS").split()
 
-CORS_ALLOWED_ORIGINS = True
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS").split()
 # Application definition
 
 INSTALLED_APPS = [
@@ -65,9 +65,6 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-]
 
 ROOT_URLCONF = 'AccuracyTestBackend.urls'
 
