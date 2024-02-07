@@ -12,7 +12,7 @@ class QuizInfo(models.Model):
 
 
 class AcuTest(models.Model):
-    answers = ArrayField(models.IntegerField(), max_length=30)
+    answers = ArrayField(models.IntegerField(), max_length=43)
     quiz_info = models.OneToOneField(QuizInfo, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
