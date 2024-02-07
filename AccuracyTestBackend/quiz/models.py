@@ -4,7 +4,7 @@ from django.contrib.postgres.fields import ArrayField
 
 
 class QuizInfo(models.Model):
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     start_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self) -> str:

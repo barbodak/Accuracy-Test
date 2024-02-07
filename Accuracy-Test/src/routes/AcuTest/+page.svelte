@@ -9,21 +9,35 @@
     let cnt = 0;
     let timer: any;
     let ti = 0;
-    let answers = Array(10).fill("0");
+    let answers = Array(42).fill("0");
     let isOverlayOpen = false;
 
     onMount(async () => {
-        const quiz = await retreiveQuiz({ quiz_type: "AcuTest" });
-        answers = quiz.answers.map((x: any) =>
-            x === 1 ? "A" : x === 2 ? "B" : x === 3 ? "C" : x === 4 ? "D" : "0"
+        const quiz = await retreiveQuiz({ quiz_type: "AcuTest" }).then(
+            (quiz) => {
+                console.log(quiz.quiz_info);
+                if (quiz.quiz_info == "not_started") {
+                    console.log("not started");
+                    goto("/");
+                }
+                answers = quiz.answers.map((x: any) =>
+                    x === 1
+                        ? "A"
+                        : x === 2
+                        ? "B"
+                        : x === 3
+                        ? "C"
+                        : x === 4
+                        ? "D"
+                        : "0"
+                );
+                let now = new Date();
+                let qdate = new Date(quiz.quiz_info);
+                let delta = now.valueOf() - qdate.valueOf();
+                ti = Math.floor(delta / 1000);
+                timer = tweened(5 * 60 - ti);
+            }
         );
-        let now = new Date();
-        let qdate = new Date(quiz.quiz_info);
-        let delta = now.valueOf() - qdate.valueOf();
-        ti = Math.floor(delta / 1000);
-        timer = tweened(5 * 60 - ti);
-        console.log(timer);
-        console.log("f");
     });
     setInterval(() => {
         if ($timer > -2) $timer--;
@@ -94,7 +108,7 @@
         </div>
     </nav>
 </header>
-{#each Array(10) as _, index (index)}
+{#each Array(42) as _, index (index)}
     <Question number={index + 1} bind:selected={answers[index]} />
 {/each}
 

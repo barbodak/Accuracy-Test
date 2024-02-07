@@ -59,8 +59,9 @@ class QuizViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, quiz_type):
         quiz = self.get_quiz(quiz_type, request.user)
+        print(quiz)
         if quiz is None or quiz.quiz_info.start_time is None:
-            return HttpResponse(status=400)
+            return JsonResponse({f"quiz_info": "not_started"})
         match quiz_type:
             case "AcuTest":
                 return JsonResponse(AcuTestSerializer(quiz).data)

@@ -48,13 +48,11 @@
     <br />
     <h1>
         {#if isAcuDone}
-            <h1 class="text-l">
-                you have already taken the AcuTest, here are your answers
-            </h1>
-
-            {#each acuAnswers as answer}
-                {answer},
-            {/each}
+            <h1 class="text-l">you have already taken the AcuTest</h1>
+            <!---->
+            <!-- {#each acuAnswers as answer} -->
+            <!--     {answer}, -->
+            <!-- {/each} -->
         {:else if hasAcuPerm}
             <button
                 class="bg-green-600 hover:bg-green-900 text-white font-bold py-2 px-4 rounded inline-block mt-2"
@@ -71,10 +69,10 @@
     <br />
     <h1>
         {#if isValuDone}
-            <h1>you have already taken the ValuTest, here are your answers</h1>
-            {#each valuAnswers as answer}
-                {answer},
-            {/each}
+            <h1>you have already taken the ValuTest</h1>
+            <!-- {#each valuAnswers as answer} -->
+            <!--     {answer}, -->
+            <!-- {/each} -->
         {:else if hasValPerm}
             <button
                 class="bg-green-600 hover:bg-green-900 text-white font-bold py-2 px-4 rounded inline-block mt-2"
@@ -88,4 +86,8 @@
             <p>You do not have permission to take the ValuTest</p>
         {/if}
     </h1>
+    <!-- {hasValPerm} -->
+    <!-- {hasAcuPerm} -->
+    <!-- {isAcuDone} -->
+    <!-- {isValuDone} -->
 </Overlay>

@@ -31,27 +31,34 @@
     import { goto } from "$app/navigation";
     import { onMount } from "svelte";
     import Overlay from "../../components/Overlay.svelte";
+    import Question from "../../components/Question.svelte";
     let number = 30;
     let cnt = 0;
     let timer: any;
     let ti = 0;
 
     onMount(async () => {
-        const quiz = await retreiveQuiz({ quiz_type: "ValuTest" });
-        answers = quiz.answers.map((x: any) => x - 1);
-        answers = answers.slice(0, 20);
-        answers.forEach((x: any, i: any) => {
-            if (x !== -1) {
-                cardWasUsed[x] = true;
+        const quiz = await retreiveQuiz({ quiz_type: "ValuTest" }).then(
+            (quiz) => {
+                console.log(quiz.quiz_info);
+                if (quiz.quiz_info == "not_started") {
+                    console.log("not started");
+                    goto("/");
+                }
+                answers = quiz.answers.map((x: any) => x - 1);
+                answers = answers.slice(0, 20);
+                answers.forEach((x: any, i: any) => {
+                    if (x !== -1) {
+                        cardWasUsed[x] = true;
+                    }
+                });
+                let now = new Date();
+                let qdate = new Date(quiz.quiz_info);
+                let delta = now.valueOf() - qdate.valueOf();
+                ti = Math.floor(delta / 1000);
+                timer = tweened(5 * 60 - ti);
             }
-        });
-        let now = new Date();
-        let qdate = new Date(quiz.quiz_info);
-        let delta = now.valueOf() - qdate.valueOf();
-        ti = Math.floor(delta / 1000);
-        timer = tweened(5 * 60 - ti);
-        console.log(timer);
-        console.log("f");
+        );
     });
     setInterval(() => {
         if ($timer > -2) $timer--;
