@@ -14,15 +14,20 @@ class Organization(models.Model):
 
 
 class Account(models.Model):
-    class Sex(models.TextChoices):
-        MALE = "MALE ", _("MALE")
-        FEMALE = "FEMALE ", _("FEMALE")
-        __empty__ = _("(Unknown)")
+    MALE = 'M'
+    FEMALE = 'F'
+    OTHER = 'O'
+    SEX_CHOICES = [  # Correct definition
+        (MALE, 'Male'),
+        (FEMALE, 'Female'),
+        (OTHER, 'Other'),
+    ]
 
+    sex = models.CharField(max_length=1, choices=SEX_CHOICES)
     # info
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     age = models.IntegerField(editable=True)
-    sex = models.TextField(choices=Sex, default=Sex.__empty__)
+    sex = models.CharField(max_length=1, choices=SEX_CHOICES)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     organization = models.ForeignKey(Organization, on_delete=models.DO_NOTHING)
