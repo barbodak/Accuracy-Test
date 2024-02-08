@@ -12,30 +12,23 @@
     let first_name = "";
     let last_name = "";
     onMount(async () => {
-        let account = await retreiveAccount().then((account) => {
-            hasValPerm = account.valTest_permition;
-            hasAcuPerm = account.acuTest_permition;
-            first_name = account.first_name;
-            last_name = account.last_name;
-        });
-        let valutest = await retreiveQuiz({ quiz_type: "ValuTest" }).then(
-            (quiz) => {
-                let now = new Date();
-                let qdate = new Date(quiz.quiz_info);
-                let delta = now.valueOf() - qdate.valueOf();
-                if (Math.floor(delta / 1000) >= 5 * 60) isValuDone = true;
-                valuAnswers = quiz.answers;
-            }
-        );
-        let acutest = await retreiveQuiz({ quiz_type: "AcuTest" }).then(
-            (quiz) => {
-                let now = new Date();
-                let qdate = new Date(quiz.quiz_info);
-                let delta = now.valueOf() - qdate.valueOf();
-                if (Math.floor(delta / 1000) >= 5 * 60) isAcuDone = true;
-                acuAnswers = quiz.answers;
-            }
-        );
+        let account = await retreiveAccount();
+        hasValPerm = account.valTest_permition;
+        hasAcuPerm = account.acuTest_permition;
+        first_name = account.first_name;
+        last_name = account.last_name;
+        let valutest = await retreiveQuiz({ quiz_type: "ValuTest" });
+        let now = new Date();
+        let qdate = new Date(valutest.quiz_info);
+        let delta = now.valueOf() - qdate.valueOf();
+        if (Math.floor(delta / 1000) >= 180 * 60) isValuDone = true;
+        valuAnswers = valutest.answers;
+        let acutest = await retreiveQuiz({ quiz_type: "AcuTest" });
+        now = new Date();
+        qdate = new Date(acutest.quiz_info);
+        delta = now.valueOf() - qdate.valueOf();
+        if (Math.floor(delta / 1000) >= 5 * 60) isAcuDone = true;
+        acuAnswers = acutest.answers;
     });
 </script>
 
