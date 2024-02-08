@@ -41,7 +41,8 @@
                 }
             });
             answers[dropZoneIndex] = cardIndex;
-            if (wasDroped === false) cardWasUsed[tmp] = false;
+            if (wasDroped === false && tmp !== cardIndex)
+                cardWasUsed[tmp] = false;
         }
         hoveringOver = 100;
     }
@@ -137,8 +138,12 @@
                         on:dragover={(ev) => {
                             ev.preventDefault();
                         }}
+                        role="button"
+                        tabindex="0"
                     >
-                        {#if answers[index] < 0}{:else}
+                        {#if answers[index] < 0}
+                            <div />
+                        {:else}
                             <ValCard
                                 id={answers[index]}
                                 on:dragstart={(event) =>

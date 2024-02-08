@@ -3,16 +3,13 @@
 
     export let id: number;
     let name = String.fromCharCode("A".charCodeAt(0) + id);
-    let wasClicked = false;
 </script>
 
-<div class="" draggable={true} on:dragstart>
+<div class="" draggable={true} on:dragstart role="button" tabindex="0">
     <button on:click>
         <img src="/images/cards/{name}.jpg" alt={name} />
-        {#if wasClicked === true}
-            <Overlay canBeExited={true} isTransparent={false}>
-                <img src="/images/cards/{name}.jpg" alt={name} />
-            </Overlay>
-        {/if}
+        <!-- <Overlay canBeExited={true} isTransparent={false}> -->
+        <!--     <img src="/images/cards/{name}.jpg" alt={name} /> -->
+        <!-- </Overlay> -->
     </button>
 </div>
