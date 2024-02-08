@@ -8,8 +8,8 @@
 <div class="" draggable={true} on:dragstart role="button" tabindex="0">
     <button on:click>
         <img src="/images/cards/{name}.jpg" alt={name} />
-        <Overlay canBeExited={true} isTransparent={false}>
-            <img src="/images/cards/{name}.jpg" alt={name} />
-        </Overlay>
+        <!-- <Overlay canBeExited={true} isTransparent={false}> -->
+        <!--     <img src="/images/cards/{name}.jpg" alt={name} /> -->
+        <!-- </Overlay> -->
     </button>
 </div>
