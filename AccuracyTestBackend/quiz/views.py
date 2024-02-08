@@ -50,8 +50,13 @@ class QuizViewSet(viewsets.ViewSet):
         quiz = self.get_quiz(quiz_type, request.user)
         if quiz is None or quiz.quiz_info.start_time is None:
             return HttpResponse(status=400)
-        if (timezone.now() - quiz.quiz_info.start_time).seconds > 60 * 5 + 10:
-            return HttpResponse(status=400)
+        match quiz_type:
+            case "AcuTest":
+                if (timezone.now() - quiz.quiz_info.start_time).seconds > 60 * 5 + 10:
+                    return HttpResponse(status=400)
+            case "ValuTest":
+                if (timezone.now() - quiz.quiz_info.start_time).seconds > 60 * 180:
+                    return HttpResponse(status=400)
         print(request.data.get('answers'))
         quiz.answers = request.data.get('answers')
         quiz.save()
