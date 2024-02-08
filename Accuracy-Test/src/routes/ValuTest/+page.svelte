@@ -3,7 +3,9 @@
     import Layout from "../+layout.svelte";
     import ValCard from "../../components/ValCard.svelte";
     import Page from "../+page.svelte";
-    let answers = Array(20).fill(-1);
+    let answers = Array(20)
+        .fill(-1)
+        .map((x, i) => -1 * i);
     let cardWasUsed = Array(20).fill(false);
     let txt = "no touching yet";
     let hoveringOver = 90;
@@ -14,16 +16,29 @@
     }
     function handleDrop(event: any, dropZoneIndex: number) {
         event.preventDefault();
-        if (answers[dropZoneIndex] === -1) {
-            const cardIndex = parseInt(event.dataTransfer.getData("cardName"));
-            txt = cardIndex.toString();
+        const cardIndex = parseInt(event.dataTransfer.getData("cardName"));
+        cardWasUsed[cardIndex] = true;
+        if (answers[dropZoneIndex] < 0) {
             // Remove the item from one basket.
             // Splice returns an array of the deleted elements, just one in this case.
-            cardWasUsed[cardIndex] = true;
-            answers[dropZoneIndex] = 0;
+            answers.map((x, i) => {
+                if (x === cardIndex) {
+                    answers[i] = -1 * i;
+                }
+            });
             answers[dropZoneIndex] = cardIndex;
-            hoveringOver = 100;
+        } else {
+            // swaping
+            let tmp = answers[dropZoneIndex];
+            answers[dropZoneIndex] = -100;
+            answers.forEach((x, i) => {
+                if (x === cardIndex) {
+                    answers[i] = tmp;
+                }
+            });
+            answers[dropZoneIndex] = cardIndex;
         }
+        hoveringOver = 100;
     }
 
     import { tweened } from "svelte/motion";
@@ -34,63 +49,33 @@
     import Question from "../../components/Question.svelte";
     let number = 30;
     let cnt = 0;
-    let timer: any;
-    let ti = 0;
 
     onMount(async () => {
-        const quiz = await retreiveQuiz({ quiz_type: "ValuTest" }).then(
-            (quiz) => {
-                console.log(quiz.quiz_info);
-                if (quiz.quiz_info == "not_started") {
-                    console.log("not started");
-                    goto("/");
-                }
-                answers = quiz.answers.map((x: any) => x - 1);
-                answers = answers.slice(0, 20);
-                answers.forEach((x: any, i: any) => {
-                    if (x !== -1) {
-                        cardWasUsed[x] = true;
-                    }
-                });
-                let now = new Date();
-                let qdate = new Date(quiz.quiz_info);
-                let delta = now.valueOf() - qdate.valueOf();
-                ti = Math.floor(delta / 1000);
-                timer = tweened(5 * 60 - ti);
+        const quiz = await retreiveQuiz({ quiz_type: "ValuTest" });
+        if (quiz.quiz_info == "not_started") {
+            console.log("not started");
+            goto("/");
+        }
+        answers = quiz.answers.map((x: any) => x - 1);
+        answers = answers.slice(0, 20);
+        answers.forEach((x: any, i: any) => {
+            if (x >= 0) {
+                cardWasUsed[x] = true;
             }
-        );
+        });
     });
-    setInterval(() => {
-        if ($timer > -2) $timer--;
-    }, 1000);
-
     let submit_promise: Promise<void>;
     function handleSubmit() {
         // just because you feel it doesn't mean it's there
         // tupac
         let ans = answers.map((x) => x + 1);
-        console.log(ans);
         submit_promise = submitAnswer({
             answers: ans,
             quiz_type: "ValuTest",
         });
     }
-    $: minutes = Math.floor($timer / 60);
-    $: seconds = Math.floor($timer - minutes * 60);
-    $: {
-        if (seconds == 0) handleSubmit();
-    }
-    $: {
-        if (seconds == 0 && minutes == 0) {
-            handleSubmit();
-            console.log("submitting");
-        }
-    }
-    $: {
-        if (seconds < 0 || minutes < 0) {
-            goto("/TestEnded");
-        }
-    }
+
+    // Force UI update if needed (though this should generally not be necessary)
 </script>
 
 <header class="fixed top-0 w-full bg-blue-900 text-white z-10">
@@ -109,14 +94,6 @@
                     End Test
                 </button>
             </div>
-            <div class="space-x-4 lg:flex lg:w-auto lg:order-1">
-                <!-- Swapped order for large screens -->
-                <p
-                    class="text-white p-3 rounded-3xl border-white border-2 text-lg"
-                >
-                    {minutes + " : " + seconds}
-                </p>
-            </div>
         </div>
     </nav>
 </header>
@@ -129,12 +106,12 @@
         <div class="w-1/5 h-screen fixed right-0 bg-blue-950 overflow-auto z-0">
             {#each cardWasUsed as card, index}
                 {#if card === false}
-                    <div
-                        class="mx-5 my-7"
-                        draggable={true}
-                        on:dragstart={(event) => handleDragStart(event, index)}
-                    >
-                        <ValCard id={index} />
+                    <div class="mx-5 my-7">
+                        <ValCard
+                            id={index}
+                            on:dragstart={(event) =>
+                                handleDragStart(event, index)}
+                        />
                     </div>
                 {/if}
             {/each}
@@ -147,7 +124,7 @@
             <div
                 class="grid grid-cols-5 grid-rows-4 gap-x-5 gap-y-6 h-screen p-5"
             >
-                {#each answers as answer, index}
+                {#each answers as answer, index (answer)}
                     <div
                         class={"border-2 border-solid rounded-md text-center place-items-center " +
                             (hoveringOver === index
@@ -160,18 +137,16 @@
                             ev.preventDefault();
                         }}
                     >
-                        {#if answers[index] === -1}{:else}
-                            <div
-                                class="h-full w-full flex justify-center items-center"
-                            >
-                                <ValCard
-                                    id={answers[index]}
-                                    on:click={() => {
-                                        cardWasUsed[answers[index]] = false;
-                                        answers[index] = -1;
-                                    }}
-                                />
-                            </div>
+                        {#if answers[index] < 0}{:else}
+                            <ValCard
+                                id={answers[index]}
+                                on:dragstart={(event) =>
+                                    handleDragStart(event, answers[index])}
+                                on:click={() => {
+                                    cardWasUsed[answers[index]] = false;
+                                    answers[index] = -1 * index;
+                                }}
+                            />
                         {/if}
                     </div>
                 {/each}
