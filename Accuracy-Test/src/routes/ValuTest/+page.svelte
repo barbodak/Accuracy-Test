@@ -25,7 +25,7 @@
             // Splice returns an array of the deleted elements, just one in this case.
             answers.map((x, i) => {
                 if (x === cardIndex) {
-                    answers[i] = -1 * i;
+                    answers[i] = -1 * (i + 1);
                 }
             });
             answers[dropZoneIndex] = cardIndex;
@@ -55,9 +55,7 @@
         {
             let i = 0;
             for (let q of quiz.answers) {
-                if (i < 20 && q > 0) {
-                    answers[i] = q - 1;
-                }
+                if (i < 20 && q > 0) answers[i] = q - 1;
                 i++;
             }
         }
@@ -71,7 +69,7 @@
     function handleSubmit() {
         // just because you feel it doesn't mean it's there
         // tupac
-        let ans = answers.map((x) => x + 1);
+        let ans = answers.map((x) => Math.max(x + 1, 0));
         submit_promise = submitAnswer({
             answers: ans,
             quiz_type: "ValuTest",
