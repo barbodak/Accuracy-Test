@@ -1,11 +1,13 @@
 <script lang="ts">
-    import { writable } from "svelte/store";
-    import Layout from "../+layout.svelte";
     import ValCard from "../../components/ValCard.svelte";
-    import Page from "../+page.svelte";
+    import { retreiveQuiz, submitAnswer } from "$lib/utils/api/quiz-apis";
+    import { goto } from "$app/navigation";
+    import { onMount } from "svelte";
+    import Overlay from "../../components/Overlay.svelte";
+
     let answers = Array(20)
         .fill(-1)
-        .map((x, i) => -1 * i);
+        .map((x, i) => -1 * (i + 1));
     let cardWasUsed = Array(20).fill(false);
     let txt = "no touching yet";
     let hoveringOver = 90;
@@ -29,26 +31,20 @@
             answers[dropZoneIndex] = cardIndex;
         } else {
             // swaping
+            let wasDroped = false;
             let tmp = answers[dropZoneIndex];
             answers[dropZoneIndex] = -100;
             answers.forEach((x, i) => {
                 if (x === cardIndex) {
                     answers[i] = tmp;
+                    wasDroped = true;
                 }
             });
             answers[dropZoneIndex] = cardIndex;
+            if (wasDroped === false) cardWasUsed[tmp] = false;
         }
         hoveringOver = 100;
     }
-
-    import { tweened } from "svelte/motion";
-    import { retreiveQuiz, submitAnswer } from "$lib/utils/api/quiz-apis";
-    import { goto } from "$app/navigation";
-    import { onMount } from "svelte";
-    import Overlay from "../../components/Overlay.svelte";
-    import Question from "../../components/Question.svelte";
-    let number = 30;
-    let cnt = 0;
 
     onMount(async () => {
         const quiz = await retreiveQuiz({ quiz_type: "ValuTest" });
@@ -56,8 +52,15 @@
             console.log("not started");
             goto("/");
         }
-        answers = quiz.answers.map((x: any) => x - 1);
-        answers = answers.slice(0, 20);
+        {
+            let i = 0;
+            for (let q of quiz.answers) {
+                if (i < 20 && q > 0) {
+                    answers[i] = q - 1;
+                }
+                i++;
+            }
+        }
         answers.forEach((x: any, i: any) => {
             if (x >= 0) {
                 cardWasUsed[x] = true;
@@ -144,7 +147,7 @@
                                     handleDragStart(event, answers[index])}
                                 on:click={() => {
                                     cardWasUsed[answers[index]] = false;
-                                    answers[index] = -1 * index;
+                                    answers[index] = -1 * (index + 1);
                                 }}
                             />
                         {/if}
