@@ -1,12 +1,14 @@
 <script lang="ts">
     import Overlay from "../../../components/Overlay.svelte";
     import { startQuiz } from "$lib/utils/api/quiz-apis";
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
     let promise: Promise<void>;
     const startQuizHandler = async () => {
         promise = startQuiz({
             quiz_type: "AcuTest",
         });
         await promise;
+        window.location.href = "/AcuTest";
     };
 </script>
 
@@ -18,10 +20,10 @@
     <p>-rule 2</p>
     <p>-rule 3</p>
     <p>{"Good luck :)"}</p>
-    <a
+    <button
         on:click={startQuizHandler}
-        href="/AcuTest"
         class="bg-green-600 hover:bg-green-900 text-white font-bold py-2 px-4 rounded inline-block mt-2"
-        >شروع</a
     >
+        شروع
+    </button>
 </Overlay>
