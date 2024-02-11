@@ -10,11 +10,7 @@
     <button on:click on:dblclick={() => (wasDoubleClicked = true)}>
         <img src="/images/cards/{name}.jpg" alt={name} />
         {#if wasDoubleClicked}
-            <Overlay
-                canBeExited={true}
-                isTransparent={true}
-                on:click={() => (wasDoubleClicked = false)}
-            >
+            <Overlay canBeExited={true} isTransparent={false}>
                 <img src="/images/cards/{name}.jpg" alt={name} />
             </Overlay>
         {/if}
