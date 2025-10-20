@@ -18,6 +18,7 @@ from .serializers import (
     AcuTestTextSerializer,
     ValuTestSerializer,
 )  # , QuizInfoSerializer
+import logging
 
 
 class QuizViewSet(viewsets.ViewSet):
@@ -44,8 +45,9 @@ class QuizViewSet(viewsets.ViewSet):
         return quiz
 
     def calculateValuTestResult(self, quiz):
+        logger = logging.getLogger(__name__)
         answers = quiz.answers
-        print("fuck")
+        logger.warning("fuck")
         for i in range(20):
             if answers[i] in (3, 7, 10, 14, 18, 19):
                 quiz.sharayet_kari += (i % 5) + 1
@@ -62,19 +64,22 @@ class QuizViewSet(viewsets.ViewSet):
             quiz.save()
 
     def startQuiz(self, request, quiz_type):
-        print("start")
+        logger = logging.getLogger(__name__)
+        logger.warning("start")
         quiz = self.get_quiz(quiz_type, request.user)
         if quiz is None:
             return HttpResponse(status=400)
         if quiz.quiz_time.start_time is None:
             quiz.quiz_time.start_time = timezone.now()
             quiz.quiz_time.save()
-            print(quiz.quiz_time.start_time)
+            logger.warning(quiz.quiz_time.start_time)
             return HttpResponse(status=200)
         else:
             return HttpResponse(status=400)
 
     def submitAnswer(self, request, quiz_type):
+        logger = logging.getLogger(__name__)
+        logger.warning("test")
         quiz = self.get_quiz(quiz_type, request.user)
         if quiz is None or quiz.quiz_time.start_time is None:
             return HttpResponse(status=400)
@@ -93,18 +98,23 @@ class QuizViewSet(viewsets.ViewSet):
                 if (
                     timezone.now() - quiz.quiz_time.start_time
                 ).seconds > conf.VALU_TEST_TIMELIMIT_SECONDS:
-                    self.calculateValuTestResult(quiz)
                     return HttpResponse(status=400)
+                    logger.warning("a")
+                else:
+                    self.calculateValuTestResult(quiz)
+                    logger.warning("b")
 
-        print(request.data.get("answers"))
+        logger.warning(request.data.get("answers"))
         quiz.answers = request.data.get("answers")
         quiz.quiz_time.finish_time = timezone.now()
+        quiz.quiz_time.save()
         quiz.save()
         return HttpResponse(status=200)
 
     def retrieve(self, request, quiz_type):
+        logger = logging.getLogger(__name__)
         quiz = self.get_quiz(quiz_type, request.user)
-        print(quiz)
+        logger.warning(quiz)
         if quiz is None or quiz.quiz_time.start_time is None:
             return JsonResponse({"quiz_time": "not_started"})
         match quiz_type:
