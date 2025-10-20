@@ -13,12 +13,10 @@ from knox.auth import TokenAuthentication
 
 from .serializer import AccountSerializer
 from account.models import Account
-from quiz.models import AcuTest, QuizInfo, ValuTest
 from .models import Account
 
 
 class AccountViewSet(viewsets.ViewSet):
-
     authentication_classes = (TokenAuthentication,)
     ermission_classes = (IsAuthenticated,)
 

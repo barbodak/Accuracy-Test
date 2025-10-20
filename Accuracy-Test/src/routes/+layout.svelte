@@ -1,10 +1,11 @@
 <script lang="ts">
-    import type { LayoutData } from "./$types";
-    import axios from "axios";
-    import { userData } from "$lib/stores/userStore";
-    import { onMount } from "svelte";
-    import { tokenExpiryDateTimeValidator } from "$lib/utils/datetime";
     import "../app.css";
+    import axios from "axios";
+    import { onMount } from "svelte";
+    import { userData } from "$lib/stores/userStore";
+    import { tokenExpiryDateTimeValidator } from "$lib/utils/datetime";
+
+    // --- Axios Setup ---
     axios.defaults.xsrfCookieName = "csrftoken";
     axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
     axios.interceptors.request.use((config) => {
@@ -12,17 +13,21 @@
         if (token) {
             config.headers.Authorization = `Token ${token}`;
         }
-        console.log(config.headers.Authorization);
         return config;
     });
-    onMount(async () => {
+
+    // --- Component Mount Logic ---
+    onMount(() => {
+        // Persist user data to localStorage
         if (typeof localStorage !== "undefined") {
             const unsubscribe = userData.subscribe((value) => {
                 localStorage.setItem("userData", JSON.stringify(value));
             });
         }
+        // Check if the auth token has expired
         tokenExpiryDateTimeValidator();
     });
 </script>
 
+<!-- This slot will render the content of the current page (e.g., +page.svelte) -->
 <slot />

@@ -3,24 +3,24 @@ from django.contrib.auth.models import User
 from django.db.models.enums import TextChoices
 from django.utils.translation import gettext_lazy as _
 
-from quiz.models import AcuTest, QuizInfo, ValuTest
+from quiz.models import AcuTest_pic, AcuTest_text, Quiztime, ValuTest
 
 
 class Organization(models.Model):
     name = models.CharField(max_length=255)
 
     def __str__(self) -> str:
-        return f'{self.name}'
+        return f"{self.name}"
 
 
 class Account(models.Model):
-    MALE = 'M'
-    FEMALE = 'F'
-    OTHER = 'O'
+    MALE = "M"
+    FEMALE = "F"
+    OTHER = "O"
     SEX_CHOICES = [  # Correct definition
-        (MALE, 'Male'),
-        (FEMALE, 'Female'),
-        (OTHER, 'Other'),
+        (MALE, "Male"),
+        (FEMALE, "Female"),
+        (OTHER, "Other"),
     ]
 
     sex = models.CharField(max_length=1, choices=SEX_CHOICES)
@@ -37,14 +37,18 @@ class Account(models.Model):
     valTest_permition = models.BooleanField(editable=True, default=False)
 
     def save(self, *args, **kwargs):
-        if not ValuTest.objects.filter(quiz_info__user=self.user).exists():
-            q1 = QuizInfo.objects.create(user=self.user)
-            ValuTest.objects.create(quiz_info=q1, answers=[0] * 30)
-        if not AcuTest.objects.filter(quiz_info__user=self.user).exists():
-            q2 = QuizInfo.objects.create(user=self.user)
-            AcuTest.objects.create(quiz_info=q2, answers=[0] * 30)
+        if not ValuTest.objects.filter(user=self.user).exists():
+            q1 = Quiztime.objects.create()
+            ValuTest.objects.create(user=self.user, quiz_time=q1, answers=[0] * 30)
+        if not AcuTest_pic.objects.filter(user=self.user).exists():
+            q1 = Quiztime.objects.create()
+            q2 = Quiztime.objects.create()
+            AcuTest_pic.objects.create(user=self.user, quiz_time=q1, answers=[0] * 42)
+            AcuTest_text.objects.create(user=self.user, quiz_time=q2, answers=[0] * 30)
         super(Account, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return f'{self.first_name} {self.last_name}'
+        return f"{self.first_name} {self.last_name}"
+
+
 # Create your models here.
