@@ -1,10 +1,9 @@
-version: '3.8'
-
 services:
   svelte-app:
     build: .
     ports:
-      # Maps port 3000 on your machine to port 3000 in the container
       - "3000:3000"
     container_name: my-svelte-app
-
+    volumes:
+      - .:/usr/src/app:z
+      - /usr/src/app/node_modules

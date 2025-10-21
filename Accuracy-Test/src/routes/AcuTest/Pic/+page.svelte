@@ -8,6 +8,8 @@
     let timer: any;
     let answers = Array(42).fill("0");
     let isOverlayOpen = false;
+    let hasQuizEnded = false;
+
     onMount(async () => {
         try {
             const quiz = await retreiveQuiz({ quiz_type: "AcuTest_pic" });
@@ -30,7 +32,7 @@
                           : "0",
             );
 
-            const quizDuration = 10 * 60; // 10 minutes in seconds
+            const quizDuration = 5 * 60; // 10 minutes in seconds
             const qdate = new Date(quiz.quiz_time);
             const now = new Date();
             const delta = now.valueOf() - qdate.valueOf();
@@ -61,7 +63,6 @@
             answers: ans,
             quiz_type: "AcuTest_pic",
         });
-        goto("/TestEnded");
     }
 
     // Reactive statements to format time and handle quiz end
@@ -71,6 +72,7 @@
         handleSubmit();
         // Stop the interval when the timer runs out
         clearInterval(timerInterval);
+        hasQuizEnded = true;
     }
 
     // Function to format time with leading zeros
@@ -142,9 +144,37 @@
                 </button>
                 <button
                     class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200"
-                    on:click={handleSubmit}
+                    on:click={() => {
+                        handleSubmit();
+                        goto("/AcuTest/Pic/start");
+                    }}
                 >
                     End Test
+                </button>
+            </div>
+        </div>
+    </Overlay>
+{/if}
+
+{#if hasQuizEnded}
+    <Overlay
+        on:close={() => (isOverlayOpen = false)}
+        isTransparent={true}
+        canBeExited={false}
+    >
+        <div class="text-center p-4">
+            <h3 class="text-xl font-bold text-white mb-2">
+                your time has ended
+            </h3>
+            <p class="text-slate-300 mb-6">
+                Thank your for compleating this quiz
+            </p>
+            <div class="flex justify-center gap-4">
+                <button
+                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200"
+                    on:click={() => goto("/")}
+                >
+                    Start the second prt
                 </button>
             </div>
         </div>

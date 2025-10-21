@@ -5,27 +5,41 @@
     import { userData } from "$lib/stores/userStore";
     import { logout } from "$lib/utils/api/authentication";
 
-    let isAcuDone = false;
+    let isAcuTextDone = false;
+    let isAcuPicDone = false;
     let isValuDone = false;
     let hasValPerm = false;
     let hasAcuPerm = false;
+    let notStartedAcuText = false;
+    let notStartedAcuPic = false;
+    let notStartedValPic = false;
     let first_name = "";
     let last_name = "";
 
-    // This is a reactive statement. It will re-run whenever the variables it depends on change.
-    // This fixes the bug where permissions were not updated correctly after the API call.
     $: tests = [
         {
-            title: "AcuTest",
-            isDone: isAcuDone,
+            title: "AcuTextTest",
+            isDone: isAcuTextDone,
             hasPermission: hasAcuPerm,
+            notStarted: notStartedAcuText,
+            startLink: "/AcuTest/Text/start",
+            continueLink: "/AcuTest/Text",
+        },
+        {
+            title: "AcuPicTest",
+            isDone: isAcuPicDone,
+            hasPermission: hasAcuPerm && isAcuTextDone,
+            notStarted: notStartedAcuPic,
             startLink: "/AcuTest/Pic/start",
+            continueLink: "/AcuTest/Pic",
         },
         {
             title: "ValuTest",
             isDone: isValuDone,
             hasPermission: hasValPerm,
+            notStarted: notStartedValPic,
             startLink: "/ValuTest/start",
+            continueLink: "/ValuTest",
         },
     ];
 
@@ -33,6 +47,8 @@
         if (!$userData?.token) {
             goto("/Login");
             return;
+        } else {
+            console.log(userData);
         }
 
         try {
@@ -47,18 +63,37 @@
 
             const valutest = await retreiveQuiz({ quiz_type: "ValuTest" });
             if (valutest?.quiz_time) {
+                if (valutest?.quiz_time == "not_started")
+                    notStartedValPic = true;
                 const now = new Date();
                 const qdate = new Date(valutest.quiz_time);
                 const delta = now.valueOf() - qdate.valueOf();
                 if (Math.floor(delta / 1000) >= 180 * 60) isValuDone = true;
             }
 
-            const acutest = await retreiveQuiz({ quiz_type: "AcuTest_text" });
-            if (acutest?.quiz_time) {
+            const acutest_text = await retreiveQuiz({
+                quiz_type: "AcuTest_text",
+            });
+            if (acutest_text?.quiz_time) {
+                if (acutest_text?.quiz_time == "not_started")
+                    notStartedAcuText = true;
                 const now = new Date();
-                const qdate = new Date(acutest.quiz_time);
+                const qdate = new Date(acutest_text.quiz_time);
                 const delta = now.valueOf() - qdate.valueOf();
-                if (Math.floor(delta / 1000) >= 5 * 60) isAcuDone = true;
+                if (Math.floor(delta / 1000) >= 6 * 60) isAcuTextDone = true;
+            }
+            const acutest_pic = await retreiveQuiz({
+                quiz_type: "AcuTest_pic",
+            });
+            if (acutest_pic?.quiz_time) {
+                if (acutest_pic?.quiz_time == "not_started")
+                    notStartedAcuPic = true;
+                const now = new Date();
+                const qdate = new Date(acutest_pic.quiz_time);
+                const delta = now.valueOf() - qdate.valueOf();
+                if (Math.floor(delta / 1000) >= 5 * 60) {
+                    isAcuPicDone = true;
+                }
             }
         } catch (error) {
             console.error("Failed to load user data or quizzes:", error);
@@ -87,7 +122,7 @@
                     </button>
                 {:else}
                     <button
-                        on:click={() => goto("/login")}
+                        on:click={() => goto("/Login")}
                         class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
                     >
                         Login
@@ -129,10 +164,14 @@
                                         You have already taken the {test.title}.
                                     </p>
                                 </div>
-                            {:else if test.hasPermission}
+                            {:else if test.hasPermission && test.notStarted}
                                 <p class="text-gray-600 mb-4">
                                     You are cleared to start this test. Please
                                     begin when you are ready.
+                                </p>
+                            {:else if test.hasPermission}
+                                <p class="text-gray-600 mb-4">
+                                    Continue your quiz.
                                 </p>
                             {:else}
                                 <div
@@ -149,12 +188,19 @@
                             {/if}
                         </div>
 
-                        {#if !test.isDone && test.hasPermission}
+                        {#if !test.isDone && test.hasPermission && test.notStarted}
                             <button
                                 class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 mt-4"
                                 on:click={() => goto(test.startLink)}
                             >
-                                Start {test.title}
+                                Start
+                            </button>
+                        {:else if !test.isDone && test.hasPermission}
+                            <button
+                                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-5 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 mt-4"
+                                on:click={() => goto(test.continueLink)}
+                            >
+                                Continue
                             </button>
                         {/if}
                     </div>

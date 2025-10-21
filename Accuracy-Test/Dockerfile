@@ -1,4 +1,4 @@
-FROM node:18.19.0 AS node-build
+FROM node:18.19.0
 
 WORKDIR /usr/src/app
 
@@ -7,6 +7,6 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
+EXPOSE 3000
 
-ENTRYPOINT [ "/bin/sh", "-c" , "node build" ]
+CMD [ "npm", "run", "dev" ]

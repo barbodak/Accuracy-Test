@@ -36,17 +36,6 @@ class Account(models.Model):
     acuTest_permition = models.BooleanField(editable=True, default=False)
     valTest_permition = models.BooleanField(editable=True, default=False)
 
-    def save(self, *args, **kwargs):
-        if not ValuTest.objects.filter(user=self.user).exists():
-            q1 = Quiztime.objects.create()
-            ValuTest.objects.create(user=self.user, quiz_time=q1, answers=[0] * 30)
-        if not AcuTest_pic.objects.filter(user=self.user).exists():
-            q1 = Quiztime.objects.create()
-            q2 = Quiztime.objects.create()
-            AcuTest_pic.objects.create(user=self.user, quiz_time=q1, answers=[0] * 42)
-            AcuTest_text.objects.create(user=self.user, quiz_time=q2, answers=[0] * 30)
-        super(Account, self).save(*args, **kwargs)
-
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name}"
 
