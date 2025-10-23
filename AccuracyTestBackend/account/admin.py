@@ -1,5 +1,3 @@
-# in the accounts admin.py
-
 from django.contrib import admin
 from django.urls import path
 from django.shortcuts import render, redirect
@@ -7,7 +5,7 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
 from . import models
-from .forms import BulkCreateForm
+from .forms import BulkCreateForm  # Assuming this form exists in forms.py
 import csv
 import secrets
 import string
@@ -31,7 +29,7 @@ class AccountAdmin(admin.ModelAdmin):
         return custom_urls + urls
 
     def bulk_create_view(self, request):
-        """The view for our custom admin page."""
+        """The view for our custom admin page, now using bulk_create."""
         form = BulkCreateForm()
 
         if request.method == "POST":
@@ -42,60 +40,76 @@ class AccountAdmin(admin.ModelAdmin):
                 acu_perm = form.cleaned_data["acuTest_permition"]
                 val_perm = form.cleaned_data["valTest_permition"]
 
-                # Use io.StringIO to create the CSV in memory
-                csv_buffer = io.StringIO()
-                writer = csv.writer(csv_buffer)
-                writer.writerow(["username", "password"])
+                users_to_create = []
+                accounts_to_create = []
+                csv_rows = [["username", "password"]]
 
-                created_accounts = []
+                # 1. Get all existing usernames ONCE to check for conflicts in memory.
+                # This is much faster than querying the DB for every new user.
+                existing_usernames = set(
+                    User.objects.values_list("username", flat=True)
+                )
 
                 for _ in range(number):
-                    # Generate a secure random password
+                    # 2. Generate credentials
                     password = secrets.token_urlsafe(8)
-
-                    # Generate a unique username
-                    username = self.generate_unique_username(length=8)
-
-                    try:
-                        # Create the User
-                        user = User.objects.create_user(
-                            username=username, password=password
-                        )
-
-                        # Create the Account
-                        models.Account.objects.create(
-                            user=user,
-                            organization=organization,
-                            acuTest_permition=acu_perm,
-                            valTest_permition=val_perm,
-                            is_final=False,
-                        )
-
-                        # Add to our list for the CSV
-                        writer.writerow([username, password])
-                        created_accounts.append(username)
-
-                    except Exception as e:
-                        # If something goes wrong, report it
-                        messages.error(request, f"Error creating user: {e}")
-                        break
-
-                if created_accounts:
-                    messages.success(
-                        request,
-                        f"Successfully created {len(created_accounts)} accounts.",
+                    username = self.generate_unique_username(
+                        existing_usernames, length=8
                     )
 
-                    # Set up the HTTP response to be a CSV download
-                    csv_buffer.seek(0)
-                    response = HttpResponse(csv_buffer, content_type="text/csv")
-                    response["Content-Disposition"] = (
-                        'attachment; filename="new_accounts.csv"'
-                    )
-                    return response
+                    # Add to our set so the *next* username we generate
+                    # doesn't conflict with one in this same batch.
+                    existing_usernames.add(username)
 
-                # Redirect back to the form if no accounts were created
-                return redirect(".")
+                    # 3. Prepare the User object (without saving)
+                    user = User(username=username)
+                    user.set_password(password)  # Hash the password
+                    users_to_create.append(user)
+
+                    # Add to our list for the CSV
+                    csv_rows.append([username, password])
+
+                try:
+                    # 4. Create all Users in ONE database query
+                    # Note: bulk_create returns the list of created objects,
+                    # (on most dbs, like Postgres) complete with their new IDs.
+                    created_users = User.objects.bulk_create(users_to_create)
+
+                    # 5. Prepare the Account objects
+                    for user in created_users:
+                        accounts_to_create.append(
+                            models.Account(
+                                user=user,
+                                organization=organization,
+                                acuTest_permition=acu_perm,
+                                valTest_permition=val_perm,
+                                is_final=False,
+                            )
+                        )
+
+                    # 6. Create all Accounts in a SECOND database query
+                    models.Account.objects.bulk_create(accounts_to_create)
+
+                except Exception as e:
+                    messages.error(request, f"Error during bulk creation: {e}")
+                    return redirect(".")
+
+                # 7. Create and return the CSV
+                csv_buffer = io.StringIO()
+                writer = csv.writer(csv_buffer)
+                writer.writerows(csv_rows)
+
+                messages.success(
+                    request,
+                    f"Successfully created {len(created_users)} accounts.",
+                )
+
+                csv_buffer.seek(0)
+                response = HttpResponse(csv_buffer, content_type="text/csv")
+                response["Content-Disposition"] = (
+                    'attachment; filename="new_accounts.csv"'
+                )
+                return response
 
         # This context is needed for the admin template
         context = dict(
@@ -105,13 +119,19 @@ class AccountAdmin(admin.ModelAdmin):
         )
         return render(request, "admin/accounts/account/bulk_create.html", context)
 
-    def generate_unique_username(self, length=10):
-        """Generates a random, unique username."""
+    def generate_unique_username(self, existing_usernames, length=10):
+        """
+        Generates a random, unique username by checking against an
+        in-memory set of existing usernames.
+        """
         alphabet = string.ascii_lowercase + string.digits
         while True:
-            username = "".join(secrets.choice(alphabet) for _ in range(length))
-            if not User.objects.filter(username=username).exists():
-                return f"user_{username}"
+            # We fix the bug here: check for "user_..." not just the random part
+            username = "user_" + "".join(
+                secrets.choice(alphabet) for _ in range(length)
+            )
+            if username not in existing_usernames:
+                return username
 
 
 # Register your models here

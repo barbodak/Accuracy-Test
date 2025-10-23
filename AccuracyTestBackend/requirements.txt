@@ -17,3 +17,4 @@ types-pytz==2023.3.1.1
 types-PyYAML==6.0.12.12
 typing_extensions==4.9.0
 gunicorn==21.2.0
+dj-database-url>=2.1.0,<2.2.0
