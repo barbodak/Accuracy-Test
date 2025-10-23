@@ -23,14 +23,16 @@ class Account(models.Model):
         (OTHER, "Other"),
     ]
 
-    sex = models.CharField(max_length=1, choices=SEX_CHOICES)
     # info
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    age = models.IntegerField(editable=True)
-    sex = models.CharField(max_length=1, choices=SEX_CHOICES)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
+    age = models.IntegerField(editable=True, null=True, blank=True)  # <-- CHANGED
+    sex = models.CharField(
+        max_length=1, choices=SEX_CHOICES, null=True, blank=True
+    )  # <-- CHANGED (and removed duplicate)
+    first_name = models.CharField(max_length=255, blank=True)  # <-- CHANGED
+    last_name = models.CharField(max_length=255, blank=True)  # <-- CHANGED
     organization = models.ForeignKey(Organization, on_delete=models.DO_NOTHING)
+    is_final = models.BooleanField(default=False)
 
     # quiz info
     acuTest_permition = models.BooleanField(editable=True, default=False)

@@ -2,6 +2,7 @@ import { userData } from "../../stores/userStore";
 import axios from 'axios';
 import { BASE_API_URL } from "../constants";
 import { goto } from '$app/navigation';
+import { retreiveAccount, retreiveQuiz } from "$lib/utils/api/quiz-apis";
 // import { success, failure, warning } from "../toasts";
 
 export const login = async (data: object) => {
@@ -13,13 +14,19 @@ export const login = async (data: object) => {
             data: data,
         });
         userData.set(response.data);
-        goto('/');
-        // success('you have successfully logged in');
+        const account = await retreiveAccount();
+        console.log(account);
+
+        if (account.is_final === false) {
+            goto('/Login/Finalize');
+        } else {
+            goto('/');
+        }
     } catch (e) {
         console.error("Login failed:", e);
-        // failure('login failed check your username and password');
     }
 };
+
 
 export const logout = () => {
     userData.set({}); // Clear user data from the store

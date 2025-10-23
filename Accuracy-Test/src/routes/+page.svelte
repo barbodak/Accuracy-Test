@@ -4,7 +4,6 @@
     import { onMount } from "svelte";
     import { userData } from "$lib/stores/userStore";
     import { logout } from "$lib/utils/api/authentication";
-
     let isAcuTextDone = false;
     let isAcuPicDone = false;
     let isValuDone = false;
@@ -15,7 +14,6 @@
     let notStartedValPic = false;
     let first_name = "";
     let last_name = "";
-
     $: tests = [
         {
             title: "AcuTextTest",
@@ -25,6 +23,7 @@
             startLink: "/AcuTest/Text/start",
             continueLink: "/AcuTest/Text",
         },
+
         {
             title: "AcuPicTest",
             isDone: isAcuPicDone,
@@ -33,6 +32,7 @@
             startLink: "/AcuTest/Pic/start",
             continueLink: "/AcuTest/Pic",
         },
+
         {
             title: "ValuTest",
             isDone: isValuDone,
@@ -42,7 +42,6 @@
             continueLink: "/ValuTest",
         },
     ];
-
     onMount(async () => {
         if (!$userData?.token) {
             goto("/Login");
@@ -53,6 +52,7 @@
 
         try {
             const account = await retreiveAccount();
+
             if (account) {
                 // By re-assigning these variables, we trigger the reactive 'tests' array to update.
                 hasValPerm = account.valTest_permition;
@@ -65,6 +65,7 @@
             if (valutest?.quiz_time) {
                 if (valutest?.quiz_time == "not_started")
                     notStartedValPic = true;
+
                 const now = new Date();
                 const qdate = new Date(valutest.quiz_time);
                 const delta = now.valueOf() - qdate.valueOf();
@@ -105,25 +106,26 @@
     }
 </script>
 
-<div class="bg-gray-100 min-h-screen">
-    <!-- Header is now part of the page, not the layout -->
-    <header class="bg-white shadow-md">
+<div class="min-h-screen bg-slate-100">
+    <header class="bg-white shadow-sm">
         <nav
-            class="container mx-auto px-6 py-4 flex justify-between items-center"
+            class="container mx-auto flex items-center justify-between px-6 py-4"
         >
-            <a href="/" class="text-xl font-bold text-blue-600">QuizPlatform</a>
+            <a href="/" class="text-xl font-bold text-indigo-600"
+                >QuizPlatform</a
+            >
             <div>
                 {#if $userData?.token}
                     <button
                         on:click={handleLogout}
-                        class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+                        class="rounded-lg bg-red-500 px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300"
                     >
                         Logout
                     </button>
                 {:else}
                     <button
                         on:click={() => goto("/Login")}
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+                        class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300"
                     >
                         Login
                     </button>
@@ -133,81 +135,71 @@
     </header>
 
     <div class="p-4 sm:p-6 lg:p-8">
-        <main class="max-w-4xl mx-auto">
-            <div class="bg-white rounded-2xl shadow-md p-8 mb-8">
-                <h1 class="text-3xl font-bold text-gray-800">
+        <main class="mx-auto max-w-4xl">
+            <div class="mb-8 rounded-lg bg-white p-8 shadow-xl">
+                <h1 class="text-3xl font-bold text-slate-800">
                     Welcome, {first_name}
                     {last_name}
                 </h1>
-                <p class="text-gray-500 mt-2">
+                <p class="mt-2 text-slate-500">
                     Here are your available assessments. Please complete them as
                     required.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:gap-8">
                 {#each tests as test}
-                    <div
-                        class="bg-white rounded-2xl shadow-md p-6 flex flex-col justify-between"
-                    >
-                        <h2 class="text-2xl font-semibold text-gray-700 mb-4">
-                            {test.title}
-                        </h2>
+                    {#if test.hasPermission}
+                        <div
+                            class="flex flex-col justify-between rounded-lg bg-white p-6 shadow-lg transition-shadow duration-200 hover:shadow-xl"
+                        >
+                            <h2
+                                class="mb-4 text-2xl font-semibold text-slate-700"
+                            >
+                                {test.title}
+                            </h2>
 
-                        <div class="flex-grow">
-                            {#if test.isDone}
-                                <div
-                                    class="p-4 rounded-lg bg-green-100 text-green-800"
+                            <div class="flex-grow">
+                                {#if test.isDone}
+                                    <div
+                                        class="rounded-lg bg-green-100 p-4 text-green-800"
+                                    >
+                                        <p class="font-semibold">Completed</p>
+                                        <p class="text-sm">
+                                            You have already taken the {test.title}.
+                                        </p>
+                                    </div>
+                                {:else if test.hasPermission && test.notStarted}
+                                    <p class="mb-4 text-slate-600">
+                                        You are cleared to start this test.
+                                        Please begin when you are ready.
+                                    </p>
+                                {:else if test.hasPermission}
+                                    <p class="mb-4 text-slate-600">
+                                        Continue your quiz.
+                                    </p>
+                                {/if}
+                            </div>
+
+                            {#if !test.isDone && test.hasPermission && test.notStarted}
+                                <button
+                                    class="mt-4 w-full rounded-lg bg-indigo-600 px-5 py-3 font-bold text-white transition-colors duration-200 hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                                    on:click={() => goto(test.startLink)}
                                 >
-                                    <p class="font-semibold">Completed</p>
-                                    <p class="text-sm">
-                                        You have already taken the {test.title}.
-                                    </p>
-                                </div>
-                            {:else if test.hasPermission && test.notStarted}
-                                <p class="text-gray-600 mb-4">
-                                    You are cleared to start this test. Please
-                                    begin when you are ready.
-                                </p>
-                            {:else if test.hasPermission}
-                                <p class="text-gray-600 mb-4">
-                                    Continue your quiz.
-                                </p>
-                            {:else}
-                                <div
-                                    class="p-4 rounded-lg bg-yellow-100 text-yellow-800"
+                                    Start
+                                </button>
+                            {:else if !test.isDone && test.hasPermission}
+                                <button
+                                    class="mt-4 w-full rounded-lg bg-green-600 px-5 py-3 font-bold text-white transition-colors duration-200 hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300"
+                                    on:click={() => goto(test.continueLink)}
                                 >
-                                    <p class="font-semibold">
-                                        Permission Required
-                                    </p>
-                                    <p class="text-sm">
-                                        You do not have permission to take the {test.title}
-                                        yet.
-                                    </p>
-                                </div>
+                                    Continue
+                                </button>
                             {/if}
                         </div>
-
-                        {#if !test.isDone && test.hasPermission && test.notStarted}
-                            <button
-                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 mt-4"
-                                on:click={() => goto(test.startLink)}
-                            >
-                                Start
-                            </button>
-                        {:else if !test.isDone && test.hasPermission}
-                            <button
-                                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-5 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 mt-4"
-                                on:click={() => goto(test.continueLink)}
-                            >
-                                Continue
-                            </button>
-                        {/if}
-                    </div>
+                    {/if}
                 {/each}
             </div>
         </main>
     </div>
-
-    <!-- Footer is also now part of the page -->
 </div>
