@@ -1,12 +1,12 @@
-FROM node:18.19.0
+FROM node:18.19.0 AS node-build
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY Accuracy-Test/package*.json ./
 RUN npm install
 
-COPY . .
+COPY Accuracy-Test/ .
 
-EXPOSE 3000
+RUN npm run build
 
-CMD [ "npm", "run", "dev" ]
+ENTRYPOINT [ "/bin/sh", "-c" , "node build" ]
