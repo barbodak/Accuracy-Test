@@ -8,3 +8,4 @@ pycache/
 *.env
 *.lockb
 *.lock-wscript
+*.log
