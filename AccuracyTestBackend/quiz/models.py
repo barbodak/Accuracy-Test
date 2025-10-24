@@ -14,7 +14,7 @@ class Quiztime(models.Model):
 class AcuTest_pic(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     answers = ArrayField(models.IntegerField(), max_length=43)
-    quiz_time = models.OneToOneField(Quiztime, on_delete=models.CASCADE)
+    quiz_time = models.OneToOneField(Quiztime, on_delete=models.DO_NOTHING)
     correct = models.IntegerField(default=0)
     wrong = models.IntegerField(default=0)
 

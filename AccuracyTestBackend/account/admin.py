@@ -11,6 +11,8 @@ import secrets
 import string
 import io
 
+from quiz.models import AcuTest_pic, AcuTest_text, Quiztime, ValuTest
+
 
 class AccountAdmin(admin.ModelAdmin):
     # This tells the admin to use our custom template for the changelist (to add the button)
@@ -52,9 +54,9 @@ class AccountAdmin(admin.ModelAdmin):
 
                 for _ in range(number):
                     # 2. Generate credentials
-                    password = secrets.token_urlsafe(8)
+                    password = secrets.token_urlsafe(12)
                     username = self.generate_unique_username(
-                        existing_usernames, length=8
+                        existing_usernames, length=12
                     )
 
                     # Add to our set so the *next* username we generate
@@ -89,6 +91,43 @@ class AccountAdmin(admin.ModelAdmin):
 
                     # 6. Create all Accounts in a SECOND database query
                     models.Account.objects.bulk_create(accounts_to_create)
+
+                    qt_for_valu = Quiztime.objects.bulk_create(
+                        [Quiztime() for _ in range(number)]
+                    )
+                    qt_for_pic = Quiztime.objects.bulk_create(
+                        [Quiztime() for _ in range(number)]
+                    )
+                    qt_for_text = Quiztime.objects.bulk_create(
+                        [Quiztime() for _ in range(number)]
+                    )
+
+                    # 4. Prepare the tests by associating users with their quiztimes
+                    valu_tests = []
+                    pic_tests = []
+                    text_tests = []
+
+                    for i, user in enumerate(created_users):
+                        valu_tests.append(
+                            ValuTest(
+                                user=user, quiz_time=qt_for_valu[i], answers=[0] * 30
+                            )
+                        )
+                        pic_tests.append(
+                            AcuTest_pic(
+                                user=user, quiz_time=qt_for_pic[i], answers=[0] * 42
+                            )
+                        )
+                        text_tests.append(
+                            AcuTest_text(
+                                user=user, quiz_time=qt_for_text[i], answers=[0] * 90
+                            )
+                        )
+
+                    # 5. Bulk create all the tests
+                    ValuTest.objects.bulk_create(valu_tests)
+                    AcuTest_pic.objects.bulk_create(pic_tests)
+                    AcuTest_text.objects.bulk_create(text_tests)
 
                 except Exception as e:
                     messages.error(request, f"Error during bulk creation: {e}")
