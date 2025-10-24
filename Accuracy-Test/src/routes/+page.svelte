@@ -69,7 +69,7 @@
                 const now = new Date();
                 const qdate = new Date(valutest.quiz_time);
                 const delta = now.valueOf() - qdate.valueOf();
-                if (Math.floor(delta / 1000) >= 180 * 60) isValuDone = true;
+                if (Math.floor(delta / 1000) >= 10 * 60) isValuDone = true;
             }
 
             const acutest_text = await retreiveQuiz({

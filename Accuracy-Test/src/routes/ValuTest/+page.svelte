@@ -166,7 +166,7 @@
     <header class="w-full bg-white dark:bg-slate-800 z-20 shadow-md">
         <nav class="container mx-auto px-4 sm:px-6 py-3">
             <div class="flex justify-between items-center">
-                <div class="text-xl font-semibold">W.I.L. آزمون</div>
+                <div class="text-xl font-semibold">WIL</div>
                 <button
                     class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-bold focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition-colors"
                     on:click={handleSubmit}
@@ -183,6 +183,34 @@
         <main class="flex-1 flex flex-col p-4 sm:p-6 min-w-0">
             <div class="mb-4">
                 <ImportanceArrow />
+            </div>
+
+            <div class="grid grid-cols-5 gap-2 sm:gap-4 mb-2 px-2">
+                <div
+                    class="text-center font-bold text-slate-600 dark:text-slate-300"
+                >
+                    ستون ۱
+                </div>
+                <div
+                    class="text-center font-bold text-slate-600 dark:text-slate-300"
+                >
+                    ستون ۲
+                </div>
+                <div
+                    class="text-center font-bold text-slate-600 dark:text-slate-300"
+                >
+                    ستون ۳
+                </div>
+                <div
+                    class="text-center font-bold text-slate-600 dark:text-slate-300"
+                >
+                    ستون ۴
+                </div>
+                <div
+                    class="text-center font-bold text-slate-600 dark:text-slate-300"
+                >
+                    ستون ۵
+                </div>
             </div>
 
             <!-- Responsive Card Grid -->
