@@ -8,19 +8,12 @@
     const dispatch = createEventDispatcher();
 </script>
 
-<!-- 
-  w-full و h-full تضمین می‌کنند که این کامپوننت فضای کامل سلول گرید والد خود را پر می‌کند.
-  overflow-hidden از سرریز شدن محتوا جلوگیری می‌کند.
--->
 <div
-    class="w-full h-full flex flex-col bg-white rounded-lg shadow-md hover:shadow-xl hover:-translatey-1 transition-all duration-200 overflow-hidden border border-slate-200 select-none relative group"
+    class="w-full h-full flex flex-col bg-white rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 overflow-hidden border border-slate-200 select-none relative group"
 >
-    <!-- دکمه حذف -->
     <button
         on:click|stopPropagation={() => dispatch("remove")}
-        class="absolute top-1 right-1 z-10 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center
-           opacity-0 group-hover:opacity-100 transition-opacity duration-200
-           hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+        class="remove-button"
         aria-label="Remove card"
     >
         <svg
@@ -42,38 +35,134 @@
         >
     </button>
 
-    <!-- بخش بالایی با حرف -->
-    <div
-        class="flex-shrink-0 bg-slate-50 pt-2 pb-1 flex items-center justify-center"
-    >
+    <div class="card-letter-section bg-slate-50">
         <span
-            class="text-4xl sm:text-5xl font-bold text-slate-700"
+            class="card-letter text-slate-700"
             style="text-shadow: 1px 1px 3px rgba(0,0,0,0.1);"
         >
             {card.letter}
         </span>
     </div>
 
-    <!-- خط جداکننده -->
     <div class="h-px bg-slate-200"></div>
 
-    <!-- 
-    بخش پایینی با متن
-    - flex-grow باعث می‌شود این بخش فضای باقیمانده را پر کند.
-    - overflow-auto باعث می‌شود که اگر متن طولانی‌تر از فضای موجود باشد،
-      یک اسکرول‌بار داخلی اضافه شود و خود کارت بزرگ‌تر نشود.
-      این کار از به هم ریختن چیدمان گرید جلوگیری می‌کند.
-  -->
-    <div
-        class="flex-grow flex flex-col items-center justify-center p-4 text-center overflow-auto"
-    >
-        <p class="text-xs sm:text-sm text-slate-500 mb-3 leading-tight">
+    <div class="card-content">
+        <p class="card-prompt text-slate-500">
             {card.prompt}
         </p>
-        <p
-            class="text-sm sm:text-base font-semibold text-slate-800 leading-relaxed"
-        >
+        <p class="card-text font-semibold text-slate-800">
             {card.text}
         </p>
     </div>
 </div>
+
+<style>
+    /* 'cqi' stands for "container query inline-size".
+      1cqi = 1% of the container's width.
+      This makes all our spacing and fonts perfectly fluid!
+    */
+
+    .card-letter-section {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* Replaces pt-2 pb-1 */
+        padding-top: 2cqi;
+        padding-bottom: 1cqi;
+    }
+
+    .card-letter {
+        font-weight: 700;
+        /* Replaces text-4xl sm:text-5xl */
+        font-size: 10cqi;
+        line-height: 1;
+    }
+
+    .card-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        overflow: auto;
+        /* Replaces p-4 */
+        padding: 4cqi;
+    }
+
+    .card-prompt {
+        /* Replaces text-xs sm:text-sm mb-3 */
+        font-size: 4cqi;
+        line-height: 1.3;
+        margin-bottom: 2cqi;
+    }
+
+    .card-text {
+        /* Replaces text-sm sm:text-base */
+        font-size: 6cqi;
+        line-height: 1.4;
+    }
+
+    .remove-button {
+        position: absolute;
+        /* Replaces top-1 right-1 */
+        top: 2cqi;
+        right: 2cqi;
+        z-index: 10;
+        /* Replaces w-6 h-6 */
+        width: 5cqi;
+        height: 5cqi;
+
+        background-color: #ef4444; /* red-500 */
+        color: white;
+        border-radius: 9999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        opacity: 0;
+        transition: all 0.2s;
+    }
+
+    /* Recreates the group-hover:opacity-100 */
+    .group:hover .remove-button {
+        opacity: 1;
+    }
+
+    .remove-button:hover {
+        background-color: #dc2626; /* red-600 */
+    }
+
+    .remove-button svg {
+        /* Scale the SVG icon relative to the button */
+        width: 60%;
+        height: 60%;
+    }
+
+    /* --- THIS IS THE RESPONSIVE MAGIC ---
+      If the container named 'val-card' is ever less than 100px wide,
+      these styles will automatically apply.
+    */
+    @container val-card (max-width: 100px) {
+        .card-prompt {
+            /* On very small cards, hide the prompt text */
+            display: none;
+        }
+
+        .card-letter {
+            /* Make the letter a bit smaller */
+            font-size: 14cqi;
+        }
+
+        .card-text {
+            /* Make the main text a bit smaller */
+            font-size: 3.5cqi;
+        }
+
+        .card-content {
+            /* Reduce padding to give text more space */
+            padding: 2.5cqi;
+        }
+    }
+</style>

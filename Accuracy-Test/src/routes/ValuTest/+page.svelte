@@ -21,6 +21,11 @@
     let selectedCardIndex: number | null = null;
     let selectedCardOriginalSlot: number | null = null;
 
+    $: usedCardsCnt = cardWasUsed.reduce(
+        (acc: number, curr: boolean) => (curr ? acc + 1 : acc),
+        0,
+    );
+
     // --- Lifecycle ---
     onMount(async () => {
         const quiz = await retreiveQuiz({ quiz_type: "ValuTest" });
@@ -29,7 +34,7 @@
             goto("/");
         }
         if (quiz.answers && quiz.answers.length > 0) {
-            quiz.answers.forEach((q, i) => {
+            quiz.answers.forEach((q: number, i: number) => {
                 if (i < 20 && q > 0) {
                     const cardId = q - 1;
                     answers[i] = cardId;
@@ -39,7 +44,6 @@
         }
     });
 
-    // --- Utility Functions ---
     function shuffle(array: any[]) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -52,7 +56,6 @@
         return cardWasUsed.every((x) => x === true);
     }
 
-    // --- Event Handlers ---
     function handleDragStart(event: DragEvent, cardIndex: number) {
         event.dataTransfer?.setData("cardIndex", cardIndex.toString());
         selectedCardIndex = null;
@@ -163,19 +166,6 @@
     class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 h-screen font-sans flex flex-col overflow-hidden"
 >
     <!-- Header -->
-    <header class="w-full bg-white dark:bg-slate-800 z-20 shadow-md">
-        <nav class="container mx-auto px-4 sm:px-6 py-3">
-            <div class="flex justify-between items-center">
-                <div class="text-xl font-semibold">WIL</div>
-                <button
-                    class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-bold focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition-colors"
-                    on:click={handleSubmit}
-                >
-                    پایان آزمون
-                </button>
-            </div>
-        </nav>
-    </header>
 
     <!-- Main Layout -->
     <div class="flex flex-1 min-h-0">
@@ -214,10 +204,10 @@
             </div>
 
             <!-- Responsive Card Grid -->
-            <div class="flex-1 grid grid-cols-5 grid-rows-4 gap-2 sm:gap-4">
+            <div class="flex-1 grid grid-cols-5 gap-2 sm:gap-4">
                 {#each answers as answer, index}
                     <div
-                        class="rounded-lg transition-all duration-200 flex items-center justify-center relative"
+                        class="rounded-lg transition-all duration-200 flex items-center justify-center"
                         class:border-dashed={answer < 0}
                         class:border-2={answer < 0}
                         class:border-slate-300={hoveringOver !== index &&
@@ -262,7 +252,7 @@
 
                         {#if answer >= 0}
                             <div
-                                class="w-full h-full cursor-grab active:cursor-grabbing group"
+                                class="w-full h-full cursor-grab active:cursor-grabbing group card-container"
                                 draggable="true"
                                 on:dragstart={(event) =>
                                     handleDragStart(event, answer)}
@@ -281,16 +271,29 @@
 
         <!-- Sidebar Card Tray -->
         <aside
-            class="w-64 sm:w-80 bg-slate-200 dark:bg-slate-800 border-l-2 border-slate-300 dark:border-slate-700 flex flex-col p-3"
+            class="w-1/5 bg-slate-200 dark:bg-slate-800 border-l-2 border-slate-300 dark:border-slate-700 flex flex-col p-3"
         >
-            <h2 class="text-lg font-bold mb-3 text-center">
-                کارت‌های باقی‌مانده
-            </h2>
-            <div class="flex-1 overflow-y-auto space-y-3 px-1 py-1">
+            <header class="w-full bg-white dark:bg-slate-800 z-20 shadow-md">
+                <nav class="container mx-auto px-4 sm:px-6 py-3">
+                    <div class="flex justify-between items-center">
+                        <div class="text-xl font-semibold">WIL پرسشنامه</div>
+                        <button
+                            class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-bold focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition-colors"
+                            on:click={handleSubmit}
+                        >
+                            پایان آزمون
+                        </button>
+                    </div>
+                </nav>
+            </header>
+            <div
+                class="flex-1 grid grid-cols-1 overflow-y-auto space-y-3 px-1 py-1"
+            >
                 {#each cardOrder as card}
                     {#if !cardWasUsed[card]}
                         <div
-                            class="rounded-lg transition-all duration-200 cursor-pointer"
+                            class="rounded-lg transition-all duration-200 cursor-pointer card-container
+                           h-36"
                             class:ring-4={selectedCardIndex === card &&
                                 selectedCardOriginalSlot === null}
                             class:ring-offset-2={selectedCardIndex === card &&
@@ -312,13 +315,25 @@
                         </div>
                     {/if}
                 {/each}
+
+                <h2 class="text-lg font-bold mb-3 text-center">
+                    {#if usedCardsCnt < 20}
+                        کارت‌های باقی‌مانده
+                    {:else}
+                        تمام کارت‌ها استفاده شده
+                    {/if}
+                </h2>
             </div>
         </aside>
     </div>
 
     <!-- Overlay Modal -->
     {#if isOverlayOpen}
-        <Overlay on:close={() => (isOverlayOpen = false)}>
+        <Overlay
+            canBeExited={false}
+            isTransparent={true}
+            on:close={() => (isOverlayOpen = false)}
+        >
             {#if hasFilledEverything()}
                 <h3 class="text-xl font-bold mb-4">پایان آزمون</h3>
                 <p>آیا مطمئن هستید که می‌خواهید آزمون را تمام کنید؟</p>
@@ -351,3 +366,10 @@
         </Overlay>
     {/if}
 </div>
+
+<style>
+    .card-container {
+        container-type: inline-size;
+        container-name: val-card; /* Optional, but very good practice */
+    }
+</style>
