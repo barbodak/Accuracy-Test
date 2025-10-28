@@ -85,16 +85,14 @@
 </svelte:head>
 
 <div
-    class="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-slate-900 p-4 font-['Vazirmatn']"
+    class="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-slate-900 font-['Vazirmatn']"
     dir="rtl"
 >
     <div
-        class="w-full max-w-2xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 sm:p-10 transition-all duration-300"
+        class="w-full max-w-2xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 sm:p-10 transition-all duration-300 overflow-y-auto"
     >
         <div class="flex justify-between items-center mb-6">
-            <h2
-                class="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-white"
-            >
+            <h2 class="text-2xl font-bold text-slate-800 dark:text-white">
                 راهنمای آزمون
             </h2>
             <span class="text-sm font-medium text-slate-500 dark:text-slate-400"
@@ -344,7 +342,6 @@ font-semibold text-white bg-green-600 hover:bg-green-700 transition-all disabled
         </div>
     </div>
 </div>
-ت ت ت ت ��
 
 <style>
     /* ایمپورت فونت وزیرمتن */

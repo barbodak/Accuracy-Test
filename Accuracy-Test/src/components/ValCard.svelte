@@ -86,7 +86,6 @@
         align-items: center;
         justify-content: center;
         text-align: center;
-        overflow: auto;
         /* Replaces p-4 */
         padding: 4cqi;
     }

@@ -100,14 +100,13 @@ class QuizViewSet(viewsets.ViewSet):
                 ).seconds > conf.VALU_TEST_TIMELIMIT_SECONDS:
                     return HttpResponse(status=400)
                     logger.warning("a")
-                else:
-                    self.calculateValuTestResult(quiz)
-                    logger.warning("b")
 
         logger.warning(request.data.get("answers"))
         quiz.answers = request.data.get("answers")
         quiz.quiz_time.finish_time = timezone.now()
         quiz.quiz_time.save()
+        if quiz_type == "ValuTest":
+            self.calculateValuTestResult(quiz)
         quiz.save()
         return HttpResponse(status=200)
 

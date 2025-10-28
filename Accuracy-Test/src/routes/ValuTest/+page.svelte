@@ -316,13 +316,13 @@
                     {/if}
                 {/each}
 
-                <h2 class="text-lg font-bold mb-3 text-center">
-                    {#if usedCardsCnt < 20}
-                        کارت‌های باقی‌مانده
-                    {:else}
-                        تمام کارت‌ها استفاده شده
-                    {/if}
-                </h2>
+                <!-- <h2 class="text-lg font-bold mb-3 text-center"> -->
+                <!--     {#if usedCardsCnt < 20} -->
+                <!--         کارت‌های باقی‌مانده -->
+                <!--     {:else} -->
+                <!--         تمام کارت‌ها استفاده شده -->
+                <!--     {/if} -->
+                <!-- </h2> -->
             </div>
         </aside>
     </div>
@@ -346,7 +346,7 @@
                     </button>
                     <button
                         class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-bold transition-colors"
-                        on:click={() => goto("/TestEnded")}
+                        on:click={() => goto("/")}
                     >
                         بله، تمام کن
                     </button>
