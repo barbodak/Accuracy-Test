@@ -346,7 +346,7 @@
                     </button>
                     <button
                         class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-bold transition-colors"
-                        on:click={() => goto("/")}
+                        on:click={() => goto("/ValuTest/result")}
                     >
                         بله، تمام کن
                     </button>

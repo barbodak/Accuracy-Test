@@ -1,6 +1,10 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import { retreiveAccount, retreiveQuiz } from "$lib/utils/api/quiz-apis";
+    import {
+        retreiveAccount,
+        retreiveQuiz,
+        retreiveQuizAnswer,
+    } from "$lib/utils/api/quiz-apis";
     import { onMount } from "svelte";
     import { userData } from "$lib/stores/userStore";
     import { logout } from "$lib/utils/api/authentication";
@@ -62,6 +66,8 @@
             }
 
             const valutest = await retreiveQuiz({ quiz_type: "ValuTest" });
+            const valuans = await retreiveQuizAnswer({ quiz_type: "ValuTest" });
+            console.log(valuans.tofigh);
             if (valutest?.quiz_time) {
                 if (valutest?.quiz_time == "not_started")
                     notStartedValPic = true;

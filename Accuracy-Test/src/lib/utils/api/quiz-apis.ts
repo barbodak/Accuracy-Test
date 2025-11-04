@@ -31,7 +31,23 @@ export const startQuiz = async (data: any) => {
 
 export const retreiveQuiz = async (data: any) => {
     try {
+        console.log(data.quiz_type);
         const url = `${BASE_API_URL}/quiz/retrieve/${data.quiz_type}/`;
+        const response = await axios({
+            method: 'get',
+            url: url,
+        });
+        console.log(response);
+        return response.data;
+    } catch (error) {
+        console.error("Error while starting quiz", error);
+    }
+}
+
+export const retreiveQuizAnswer = async (data: any) => {
+    try {
+        console.log(data.quiz_type);
+        const url = `${BASE_API_URL}/quiz/retrieve-answer/${data.quiz_type}/`;
         const response = await axios({
             method: 'get',
             url: url,

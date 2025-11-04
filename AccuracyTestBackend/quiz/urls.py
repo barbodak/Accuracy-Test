@@ -11,4 +11,8 @@ urlpatterns = [
         views.QuizViewSet.as_view({"put": "submitAnswer"}),
     ),
     path("retrieve/<str:quiz_type>/", views.QuizViewSet.as_view({"get": "retrieve"})),
+    path(
+        "retrieve-answer/<str:quiz_type>/",
+        views.QuizViewSet.as_view({"get": "retrieveAnswer"}),
+    ),
 ]
