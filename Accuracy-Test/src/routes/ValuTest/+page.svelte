@@ -1,7 +1,7 @@
 <script lang="ts">
-    import ValCardComponent from "../../components/ValCard.svelte";
-    import Overlay from "../../components/Overlay.svelte";
-    import ImportanceArrow from "../../components/Arrow.svelte";
+    import ValCardComponent from "$lib/../components/ValCard.svelte";
+    import Overlay from "$lib/../components/Overlay.svelte";
+    import ImportanceArrow from "$lib/../components/Arrow.svelte";
     import { retreiveQuiz, submitAnswer } from "$lib/utils/api/quiz-apis";
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";

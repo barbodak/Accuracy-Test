@@ -1,6 +1,6 @@
 <script lang="ts">
-    import Overlay from "../../../components/Overlay.svelte";
-    import QuestionText from "../../../components/QuestionText.svelte";
+    import Overlay from "$lib/../components/Overlay.svelte";
+    import QuestionText from "$lib/../components/QuestionText.svelte";
     import { tweened } from "svelte/motion";
     import { retreiveQuiz, submitAnswer } from "$lib/utils/api/quiz-apis";
     import { goto } from "$app/navigation";

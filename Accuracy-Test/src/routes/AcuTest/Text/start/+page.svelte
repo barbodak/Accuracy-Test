@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Overlay from "../../../../components/Overlay.svelte";
+    import Overlay from "$lib/../components/Overlay.svelte";
     import { startQuiz } from "$lib/utils/api/quiz-apis";
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
     let promise: Promise<void>;

@@ -6,7 +6,7 @@
         retreiveQuizAnswer,
     } from "$lib/utils/api/quiz-apis";
     import { onMount } from "svelte";
-    import { userData } from "$lib/stores/userStore";
+    import { getCookies } from "$lib/utils/cookies";
     import { logout } from "$lib/utils/api/authentication";
     let isAcuTextDone = false;
     let isAcuPicDone = false;
@@ -47,11 +47,11 @@
         },
     ];
     onMount(async () => {
-        if (!$userData?.token) {
+        if (!getCookies("auth_token")) {
             goto("/Login");
             return;
         } else {
-            console.log(userData);
+            console.log("was here");
         }
 
         try {
@@ -121,7 +121,7 @@
                 >QuizPlatform</a
             >
             <div>
-                {#if $userData?.token}
+                {#if getCookies("auth_token")}
                     <button
                         on:click={handleLogout}
                         class="rounded-lg bg-red-500 px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300"

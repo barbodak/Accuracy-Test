@@ -1,9 +1,8 @@
-import { userData } from "../../stores/userStore";
 import axios from 'axios';
-import { BASE_API_URL } from "../constants";
+import { BASE_API_URL, COOKIE_MAX_AGE } from "$lib/utils/constants";
 import { goto } from '$app/navigation';
 import { retreiveAccount, retreiveQuiz } from "$lib/utils/api/quiz-apis";
-// import { success, failure, warning } from "../toasts";
+import { setCookies, deleteCookies } from "$lib/utils/cookies";
 
 export const login = async (data: object) => {
     try {
@@ -13,9 +12,15 @@ export const login = async (data: object) => {
             url: url,
             data: data,
         });
-        userData.set(response.data);
+
+        console.log(response.data.token);
+
+        if (response.data?.token) {
+            setCookies('auth_token', response.data.token, COOKIE_MAX_AGE);
+        }
         const account = await retreiveAccount();
-        console.log(account);
+
+        console.log(account.first_name);
 
         if (account.is_final === false) {
             goto('/Login/Finalize');
@@ -29,7 +34,7 @@ export const login = async (data: object) => {
 
 
 export const logout = () => {
-    userData.set({}); // Clear user data from the store
+    deleteCookies('auth_token');
     goto('/Login'); // Redirect to the login page
 };
 
