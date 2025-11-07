@@ -1,0 +1,32 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<div>
+  <h1>{% trans "Bulk Create New Accounts" %}</h1>
+  <p>
+    {% trans "Select the number of accounts to create, their organization, and default test permissions." %}
+  </p>
+  <p>
+    {% trans "A .csv file with the new usernames and passwords will be downloaded." %}
+  </p>
+
+  <form method="POST" novalidate>
+    {% csrf_token %}
+    
+    <fieldset class="module aligned">
+        {% for field in form %}
+            <div class="form-row">
+                {{ field.errors }}
+                {{ field.label_tag }}
+                {{ field }}
+            </div>
+        {% endfor %}
+    </fieldset>
+
+    <div class="submit-row">
+      <input type="submit" value="{% trans 'Create Accounts and Download CSV' %}" class="default" />
+    </div>
+  </form>
+</div>
+{% endblock %}

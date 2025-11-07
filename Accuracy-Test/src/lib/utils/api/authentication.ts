@@ -1,26 +1,40 @@
-import { userData } from "../../stores/userStore";
 import axios from 'axios';
-import { BASE_API_URL } from "../constants";
+import { BASE_API_URL, COOKIE_MAX_AGE } from "$lib/utils/constants";
 import { goto } from '$app/navigation';
-// import { success, failure, warning } from "../toasts";
+import { retreiveAccount, retreiveQuiz } from "$lib/utils/api/quiz-apis";
+import { setCookies, deleteCookies } from "$lib/utils/cookies";
 
-export const login = async (data:object) => {
+export const login = async (data: object) => {
     try {
-        const url = `${ BASE_API_URL }/login/`;
+        const url = `${BASE_API_URL}/login/`;
         const response = await axios({
             method: 'post',
             url: url,
             data: data,
         });
-        userData.update(() => response.data);
-        console.log(response.data);
-        goto('/');
-        // success('you have successfully logged in');
+
+        console.log(response.data.token);
+
+        if (response.data?.token) {
+            setCookies('auth_token', response.data.token, COOKIE_MAX_AGE);
+        }
+        const account = await retreiveAccount();
+
+        console.log(account.first_name);
+
+        if (account.is_final === false) {
+            goto('/Login/Finalize');
+        } else {
+            goto('/');
+        }
     } catch (e) {
-        console.log(e);
-        console.log("yo mama");
-        // failure('login failed check your username and password');
+        console.error("Login failed:", e);
     }
 };
 
+
+export const logout = () => {
+    deleteCookies('auth_token');
+    goto('/Login'); // Redirect to the login page
+};
 

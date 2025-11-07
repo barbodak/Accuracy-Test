@@ -1,4 +1,5 @@
 env
+.venv/
 *.pyc
 *.swp
 *.pyo
@@ -7,3 +8,4 @@ pycache/
 *.env
 *.lockb
 *.lock-wscript
+*.log

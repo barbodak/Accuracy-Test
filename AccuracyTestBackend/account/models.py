@@ -3,48 +3,43 @@ from django.contrib.auth.models import User
 from django.db.models.enums import TextChoices
 from django.utils.translation import gettext_lazy as _
 
-from quiz.models import AcuTest, QuizInfo, ValuTest
+from quiz.models import AcuTest_pic, AcuTest_text, Quiztime, ValuTest
 
 
 class Organization(models.Model):
     name = models.CharField(max_length=255)
 
     def __str__(self) -> str:
-        return f'{self.name}'
+        return f"{self.name}"
 
 
 class Account(models.Model):
-    MALE = 'M'
-    FEMALE = 'F'
-    OTHER = 'O'
+    MALE = "M"
+    FEMALE = "F"
+    OTHER = "O"
     SEX_CHOICES = [  # Correct definition
-        (MALE, 'Male'),
-        (FEMALE, 'Female'),
-        (OTHER, 'Other'),
+        (MALE, "Male"),
+        (FEMALE, "Female"),
+        (OTHER, "Other"),
     ]
 
-    sex = models.CharField(max_length=1, choices=SEX_CHOICES)
     # info
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    age = models.IntegerField(editable=True)
-    sex = models.CharField(max_length=1, choices=SEX_CHOICES)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
+    age = models.IntegerField(editable=True, null=True, blank=True)  # <-- CHANGED
+    sex = models.CharField(
+        max_length=1, choices=SEX_CHOICES, null=True, blank=True
+    )  # <-- CHANGED (and removed duplicate)
+    first_name = models.CharField(max_length=255, blank=True)  # <-- CHANGED
+    last_name = models.CharField(max_length=255, blank=True)  # <-- CHANGED
     organization = models.ForeignKey(Organization, on_delete=models.DO_NOTHING)
+    is_final = models.BooleanField(default=False)
 
     # quiz info
     acuTest_permition = models.BooleanField(editable=True, default=False)
     valTest_permition = models.BooleanField(editable=True, default=False)
 
-    def save(self, *args, **kwargs):
-        if not ValuTest.objects.filter(quiz_info__user=self.user).exists():
-            q1 = QuizInfo.objects.create(user=self.user)
-            ValuTest.objects.create(quiz_info=q1, answers=[0] * 30)
-        if not AcuTest.objects.filter(quiz_info__user=self.user).exists():
-            q2 = QuizInfo.objects.create(user=self.user)
-            AcuTest.objects.create(quiz_info=q2, answers=[0] * 30)
-        super(Account, self).save(*args, **kwargs)
-
     def __str__(self) -> str:
-        return f'{self.first_name} {self.last_name}'
+        return f"{self.first_name} {self.last_name}"
+
+
 # Create your models here.

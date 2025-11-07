@@ -1,0 +1,9 @@
+services:
+  svelte-app:
+    build: .
+    ports:
+      - "3000:3000"
+    container_name: my-svelte-app
+    volumes:
+      - .:/usr/src/app:z
+      - /usr/src/app/node_modules
