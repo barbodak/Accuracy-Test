@@ -86,3 +86,18 @@ export const finalize = async (data: object) => {
     }
 
 }
+
+// export const wil_email = async (data: object) => {
+//     try {
+//         const url = "https://metasan.co/core/wp-json/metasan/v1/wil_email";
+//         const response = await axios({
+//             method: 'post',
+//             url: url,
+//             data: data,
+//         });
+//         return response.data;
+//     } catch (e) {
+//         console.error("Finalization failed:", e);
+//     }
+// }
+//

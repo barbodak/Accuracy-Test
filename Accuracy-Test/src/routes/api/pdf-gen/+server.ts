@@ -32,16 +32,12 @@ export async function GET(event: RequestEvent) {
         return new Response(pdfArray, {
             status: 200,
             headers: {
-                // Set the correct MIME type
-                'Content-Type': 'application/pdf',
+                'Content-Type': 'application/text',
 
-                // Force the browser to download the file
-                'Content-Disposition': 'attachment; filename="document.pdf"',
+                'Content-Disposition': 'attachment; filename="document.txt"',
 
-                // Set content length for better download handling
                 'Content-Length': pdfArray.length.toString(),
 
-                // Cache-control headers (optional, good practice)
                 'Cache-Control': 'private, max-age=0, must-revalidate',
             },
         });

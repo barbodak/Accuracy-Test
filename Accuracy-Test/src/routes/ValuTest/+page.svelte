@@ -204,7 +204,7 @@
             </div>
 
             <!-- Responsive Card Grid -->
-            <div class="flex-1 grid grid-cols-5 gap-2 sm:gap-4">
+            <div class="flex-1 grid grid-cols-5 grid-rows-4 gap-2 sm:gap-4">
                 {#each answers as answer, index}
                     <div
                         class="rounded-lg transition-all duration-200 flex items-center justify-center"
