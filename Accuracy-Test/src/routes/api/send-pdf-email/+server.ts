@@ -7,7 +7,7 @@ const TARGET_URL = 'https://metasan.co/core/wp-json/metasan/v1/wil_email';
 export async function POST(event: RequestEvent) {
     try {
         const body = await event.request.json().catch(() => ({}));
-        const { url, email, name, title, body: emailBody } = body as {
+        let { url, email, name, title, body: emailBody } = body as {
             url?: string;
             email?: string;
             name?: string;
@@ -15,9 +15,10 @@ export async function POST(event: RequestEvent) {
             body?: string;
         };
 
-        if (!url || !email || !name || !title || !emailBody) {
-            throw error(400, 'Missing required fields: url, email, name, title, body');
+        if (!email || !name || !title || !emailBody) {
+            error(400, 'Missing required fields: url, email, name, title, body');
         }
+        url = 'https://metasan.co/core/wp-json/metasan/v1/wil_email';
 
         const authToken = event.locals?.authToken ?? null;
 
@@ -39,7 +40,7 @@ export async function POST(event: RequestEvent) {
 
         if (!res.ok) {
             const text = await res.text().catch(() => '');
-            throw error(res.status, text || 'Upstream error');
+            error(res.status, text || 'Upstream error');
         }
 
         const ct = res.headers.get('content-type') || '';
@@ -50,6 +51,6 @@ export async function POST(event: RequestEvent) {
     } catch (e: any) {
         if (e?.status) throw e;
         console.error('send-pdf-email error:', e);
-        throw error(500, 'Internal Server Error');
+        error(500, 'Internal Server Error');
     }
 }

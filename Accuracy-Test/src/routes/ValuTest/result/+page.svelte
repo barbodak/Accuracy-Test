@@ -1,6 +1,9 @@
 <script lang="ts">
     // Import the required API function
-    import { retreiveQuizAnswer } from "$lib/utils/api/quiz-apis";
+    import {
+        retreiveQuizAnswer,
+        retreiveAccount,
+    } from "$lib/utils/api/quiz-apis";
     import { onMount } from "svelte";
     import { fly } from "svelte/transition";
 
@@ -18,31 +21,34 @@
 
     // Define the descriptions for each value
     // Keys MUST match the API property names
-    const descriptions: Record<keyof QuizResult, { title: string; text: string }> = {
+    const descriptions: Record<
+        keyof QuizResult,
+        { title: string; text: string }
+    > = {
         tofigh: {
             title: "توفیq",
-            text: "اگر توفیق باالترین ارزش شغلی برای شماست، به دنبال شغل هایی باشید که کامال متناسب با نقاط قوت شما است تا بتوانید به بهترین نحو توانایی هایتان را بروز دهید. برای شما مهم است که بتوانید نتایج تالش های خود را ببینید. شغلی را انتخاب کنید که بتوانید در آن احساس موفقیت داشته باشید."
+            text: "اگر توفیق باالترین ارزش شغلی برای شماست، به دنبال شغل هایی باشید که کامال متناسب با نقاط قوت شما است تا بتوانید به بهترین نحو توانایی هایتان را بروز دهید. برای شما مهم است که بتوانید نتایج تالش های خود را ببینید. شغلی را انتخاب کنید که بتوانید در آن احساس موفقیت داشته باشید.",
         },
         esteghlal: {
             title: "استقلال",
-            text: "اگر استقالل باالترین ارزش شغلی برای شماست ،به دنبال شغل هایی باشید که در آن آزادی عمل دارید، شغلی که به شما اجازه دهد کارها را با ابتکار عمل خودتان انجام داده و در آنها بتوانید نسبتا مستقال تصمیم گیری نمایید."
+            text: "اگر استقالل باالترین ارزش شغلی برای شماست ،به دنبال شغل هایی باشید که در آن آزادی عمل دارید، شغلی که به شما اجازه دهد کارها را با ابتکار عمل خودتان انجام داده و در آنها بتوانید نسبتا مستقال تصمیم گیری نمایید.",
         },
         pishraft: {
             title: "پیشرفت",
-            text: "اگر پیشرفت باالترین ارزش شغلی برای شماست ،در جستجوی شغل هایی باشید که امکان خوبی برای ارتقای رده دارند. همچنین شغل هایی که اعتبار و پرستیژ اجتماعی خوب یا فرصت های رهبری کردن در آن ها وجود دارد مطلوب شماست."
+            text: "اگر پیشرفت باالترین ارزش شغلی برای شماست ،در جستجوی شغل هایی باشید که امکان خوبی برای ارتقای رده دارند. همچنین شغل هایی که اعتبار و پرستیژ اجتماعی خوب یا فرصت های رهبری کردن در آن ها وجود دارد مطلوب شماست.",
         },
         ravabet: {
             title: "روابط",
-            text: "اگر روابط باالترین ارزش شغلی برای شماست ،به دنبال شغل هایی باشید که همکارانتان افرادی گرم و صمیمی باشند. همچنین شغل هایی که برای شما این موقعیت را فراهم می کند تا به دیگران کمک یا خدمت رسانی کنید برای شما مطلوب است. شما به هیچ عنوان نمی توانید شغل هایی را که با نظام ارزش هایتان هماهنگ نیست تحمل کنید."
+            text: "اگر روابط باالترین ارزش شغلی برای شماست ،به دنبال شغل هایی باشید که همکارانتان افرادی گرم و صمیمی باشند. همچنین شغل هایی که برای شما این موقعیت را فراهم می کند تا به دیگران کمک یا خدمت رسانی کنید برای شما مطلوب است. شما به هیچ عنوان نمی توانید شغل هایی را که با نظام ارزش هایتان هماهنگ نیست تحمل کنید.",
         },
         hemayat: {
             title: "حمایت",
-            text: "اگر حمایت باالترین ارزش شغلی برای شماست؛ در شرکت هایی به دنبال شغل باشید که مدیران برای کارکنانش احترام قائل هستند و از آن ها حمایت کند. همچنین دوستانه بودن سبک رهبری مدیر ارشدتان و احساس صمیمیت با او برای شما اهمیت دارد. شما به هیچ وجه نمی توانید سازمانی را که در آن عدالت رعایت نمی شود و حقوق کارکنان ضایع می شود را تحمل کنید."
+            text: "اگر حمایت باالترین ارزش شغلی برای شماست؛ در شرکت هایی به دنبال شغل باشید که مدیران برای کارکنانش احترام قائل هستند و از آن ها حمایت کند. همچنین دوستانه بودن سبک رهبری مدیر ارشدتان و احساس صمیمیت با او برای شما اهمیت دارد. شما به هیچ وجه نمی توانید سازمانی را که در آن عدالت رعایت نمی شود و حقوق کارکنان ضایع می شود را تحمل کنید.",
         },
         sharayet_kari: {
             title: "شرایط کاری",
-            text: "اگر شرایط کاری باالترین ارزش شغلی برای شماست، مشاغل و سازمان هایی را برای کار کردن انتخاب کنید که حقوق و مزایا، امنیت شغلی و شرایط کاری خوب دارد. شغلی را انتخاب کنید که با سبک کاری شما متناسب باشد (برخی افراد دوست دارند تمام وقت سرشان شلوغ باشد، یا به تنهایی کار کنند، و یا کارهای متنوعی داشته باشند). شغل هایی را انتخاب کنید که کامال با سبک کاریتان هماهنگ باشد."
-        }
+            text: "اگر شرایط کاری باالترین ارزش شغلی برای شماست، مشاغل و سازمان هایی را برای کار کردن انتخاب کنید که حقوق و مزایا، امنیت شغلی و شرایط کاری خوب دارد. شغلی را انتخاب کنید که با سبک کاری شما متناسب باشد (برخی افراد دوست دارند تمام وقت سرشان شلوغ باشد، یا به تنهایی کار کنند، و یا کارهای متنوعی داشته باشند). شغل هایی را انتخاب کنید که کامال با سبک کاریتان هماهنگ باشد.",
+        },
     };
 
     // --- State Variables ---
@@ -58,32 +64,46 @@
         description: string;
     }[] = [];
 
-    // --- Logic ---
+    let email: string;
+    let first_name: string;
+    let last_name: string;
 
     onMount(() => {
-        // Start the API call when the component mounts
         resultsPromise = retreiveQuizAnswer({ quiz_type: "ValuTest" });
+        resultsPromise
+            .then((data) => {
+                const entries = Object.entries(data) as [
+                    keyof QuizResult,
+                    number,
+                ][];
 
-        // When the promise resolves, process the data
-        resultsPromise.then(data => {
-            // Cast is necessary because Object.entries loses the specific key type
-            const entries = Object.entries(data) as [keyof QuizResult, number][];
+                entries.sort((a, b) => b[1] - a[1]);
 
-            // Sort the results: Highest score first
-            entries.sort((a, b) => b[1] - a[1]);
+                sortedResults = entries.map(([key, score]) => ({
+                    key,
+                    title: descriptions[key]?.title || key,
+                    score,
+                    description: descriptions[key]?.text || "توضیحی یافت نشد.",
+                }));
+            })
+            .catch((err) => {
+                console.error("Failed to load quiz results:", err);
+            });
+    });
 
-            // Map the sorted data to a format our template can use
-            sortedResults = entries.map(([key, score]) => ({
-                key,
-                title: descriptions[key]?.title || key,
-                score,
-                description: descriptions[key]?.text || "توضیحی یافت نشد."
-            }));
-        }).catch(err => {
-            // Handle any errors during the API call
-            console.error("Failed to load quiz results:", err);
-            // The UI will show an error message via the #await block
-        });
+    onMount(async () => {
+        try {
+            const account = await retreiveAccount();
+
+            if (account) {
+                // By re-assigning these variables, we trigger the reactive 'tests' array to update.
+                email = account.email;
+                first_name = account.first_name;
+                last_name = account.last_name;
+            }
+        } catch (error) {
+            console.error("Failed to load user data or quizzes:", error);
+        }
     });
 </script>
 
@@ -99,24 +119,36 @@
     <!-- Use #await to handle loading/error/success states -->
     {#await resultsPromise}
         <!-- PENDING: Show a loading state -->
-        <div class="w-full max-w-3xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-10 text-center">
+        <div
+            class="w-full max-w-3xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-10 text-center"
+        >
             <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-4">
                 در حال بارگذاری نتایج...
             </h2>
-            <p class="text-slate-500 dark:text-slate-400">
-                لطفا کمی صبر کنید.
-            </p>
+            <p class="text-slate-500 dark:text-slate-400">لطفا کمی صبر کنید.</p>
         </div>
     {:then data}
         <!-- SUCCESS: Show the main results card -->
-        <div class="w-full max-w-3xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 sm:p-10 transition-all duration-300">
-            
+        <h1>
+            {first_name}
+            {last_name}
+            {email}
+        </h1>
+        <div
+            class="w-full max-w-3xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 sm:p-10 transition-all duration-300"
+        >
             <!-- Header section -->
-            <div class="text-center border-b border-slate-200 dark:border-slate-700 pb-6 mb-8">
-                <h2 class="text-3xl font-bold text-slate-800 dark:text-white mb-4">
+            <div
+                class="text-center border-b border-slate-200 dark:border-slate-700 pb-6 mb-8"
+            >
+                <h2
+                    class="text-3xl font-bold text-slate-800 dark:text-white mb-4"
+                >
                     نتیجه آزمون ارزش‌های شغلی
                 </h2>
-                <p class="text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                <p
+                    class="text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed"
+                >
                     سقف نمرات هر ارزش در این آزمون ۳۰ می‌باشد. باالترین نمره در
                     این ارزش ها، با اهمیت ترین ارزش شغلی شماست. شغل هایی با
                     ترجیحات شما هماهنگ است که دارای حداقل ۲ ارزشی باشد که در آن
@@ -138,20 +170,30 @@
                         in:fly={{ y: 50, duration: 600, delay: i * 150 }}
                     >
                         <!-- Card Header: Title and Score -->
-                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4">
-                            <h3 class="text-2xl font-semibold text-blue-600 dark:text-blue-400">
+                        <div
+                            class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4"
+                        >
+                            <h3
+                                class="text-2xl font-semibold text-blue-600 dark:text-blue-400"
+                            >
                                 {i + 1}. {result.title}
                             </h3>
-                            <span class="text-3xl font-bold text-slate-800 dark:text-white shrink-0">
+                            <span
+                                class="text-3xl font-bold text-slate-800 dark:text-white shrink-0"
+                            >
                                 {result.score}
-                                <span class="text-base font-medium text-slate-500 dark:text-slate-400">
+                                <span
+                                    class="text-base font-medium text-slate-500 dark:text-slate-400"
+                                >
                                     / 30</span
                                 >
                             </span>
                         </div>
 
                         <!-- Progress Bar -->
-                        <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3 mb-5">
+                        <div
+                            class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3 mb-5"
+                        >
                             <div
                                 class="bg-blue-600 h-3 rounded-full transition-all duration-1000 ease-out"
                                 style="width: {(result.score / 30) * 100}%"
@@ -159,17 +201,20 @@
                         </div>
 
                         <!-- Description Text -->
-                        <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                        <p
+                            class="text-base text-slate-600 dark:text-slate-300 leading-relaxed"
+                        >
                             {result.description}
                         </p>
                     </div>
                 {/each}
             </div>
-
         </div>
     {:catch error}
         <!-- ERROR: Show an error message -->
-        <div class="w-full max-w-3xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-10 text-center">
+        <div
+            class="w-full max-w-3xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-10 text-center"
+        >
             <h2 class="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">
                 خطا در بارگذاری
             </h2>
@@ -191,5 +236,3 @@
         font-family: "Vazirmatn", sans-serif;
     }
 </style>
-
-

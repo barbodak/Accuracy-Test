@@ -24,11 +24,13 @@ class Account(models.Model):
     ]
 
     DIPLOMA = "diploma"
+    STUDENT = "student"
     BACHELOR = "bachelor"
     MASTERS = "masters"
     DOCTORATE = "doctorate"
     DEGREE_CHOICES = [
         (DIPLOMA, "Diploma"),
+        (STUDENT, "Student"),
         (BACHELOR, "Bachelor"),
         (MASTERS, "Masters"),
         (DOCTORATE, "Doctorate"),
@@ -43,6 +45,7 @@ class Account(models.Model):
     first_name = models.CharField(max_length=255, blank=True)  # <-- CHANGED
     last_name = models.CharField(max_length=255, blank=True)  # <-- CHANGED
     email = models.EmailField(blank=True)
+    phone = models.CharField(blank=True, null=True, max_length=255)
     university = models.CharField(max_length=255, blank=True)
     major = models.CharField(max_length=255, blank=True)
     degree = models.CharField(

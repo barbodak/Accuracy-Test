@@ -7,6 +7,7 @@
         first_name: "",
         last_name: "",
         email: "",
+        phone: "",
         university: "",
         degree: "",
         major: "",
@@ -49,6 +50,13 @@
         if (formData.age <= 0) {
             error = "لطفا سن معتبری وارد کنید.";
             return;
+        }
+        if (formData.phone) {
+            const phoneRegex = /^09\d{9}$/; // Starts with 09, followed by 8 digits
+            if (!phoneRegex.test(formData.phone)) {
+                error = "شماره تلفن نامعتبر";
+                return;
+            }
         }
         error = null;
 
@@ -93,9 +101,9 @@
             />
         </div>
 
-        <h2 class="text-center text-2xl font-bold text-slate-800">
-            تکمیل پروفایل
-        </h2>
+        <!-- <h2 class="text-center text-2xl font-bold text-slate-800"> -->
+        <!--     تکمیل پروفایل -->
+        <!-- </h2> -->
 
         <div>
             <label
@@ -110,7 +118,7 @@
                 id="first_name"
                 bind:value={formData.first_name}
                 class="block w-full rounded-md border-slate-300 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base"
-                placeholder="مثلا: سارا"
+                placeholder="نام شما"
                 required
             />
         </div>
@@ -128,7 +136,7 @@
                 id="last_name"
                 bind:value={formData.last_name}
                 class="block w-full rounded-md border-slate-300 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base"
-                placeholder="مثلا: رضایی"
+                placeholder="نام خانوادگی شما"
                 required
             />
         </div>
@@ -193,6 +201,23 @@
 
         <div>
             <label
+                for="phone"
+                class="mb-1 block text-sm font-medium text-slate-700"
+            >
+                شماره تماس (درصورت تمایل)
+            </label>
+            <input
+                type="phoen"
+                name="phone"
+                id="phone"
+                bind:value={formData.phone}
+                class="block w-full rounded-md border-slate-300 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base"
+                placeholder="۰۹۱۲۳۴۵۶۷۸۹"
+            />
+        </div>
+
+        <div>
+            <label
                 for="degree"
                 class="mb-1 block text-sm font-medium text-slate-700"
             >
@@ -207,6 +232,7 @@
             >
                 <option value="" disabled>لطفا انتخاب کنید...</option>
                 <option value="diploma">دیپلوم</option>
+                <option value="student">دانشجو</option>
                 <option value="bachelor">کارشناسی</option>
                 <option value="masters">کارشناسی ارشد</option>
                 <option value="doctorate">دکترا</option>
