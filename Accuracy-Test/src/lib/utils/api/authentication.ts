@@ -32,6 +32,29 @@ export const login = async (data: object) => {
     }
 };
 
+export const signup = async (data: object) => {
+    try {
+        const url = `${BASE_API_URL}/account/signup/`;
+        const response = await axios({
+            method: 'post',
+            url: url,
+            data: data,
+        });
+
+        if (response.data?.token) {
+            setCookies('auth_token', response.data.token, COOKIE_MAX_AGE);
+        }
+
+        const account = await retreiveAccount();
+        return response.data;
+    } catch (e) {
+        console.error("Signup failed:", e);
+        throw e;
+    }
+
+}
+
+
 
 export const logout = () => {
     deleteCookies('auth_token');

@@ -23,6 +23,17 @@ class Account(models.Model):
         (OTHER, "Other"),
     ]
 
+    DIPLOMA = "diploma"
+    BACHELOR = "bachelor"
+    MASTERS = "masters"
+    DOCTORATE = "doctorate"
+    DEGREE_CHOICES = [
+        (DIPLOMA, "Diploma"),
+        (BACHELOR, "Bachelor"),
+        (MASTERS, "Masters"),
+        (DOCTORATE, "Doctorate"),
+    ]
+
     # info
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     age = models.IntegerField(editable=True, null=True, blank=True)  # <-- CHANGED
@@ -31,6 +42,12 @@ class Account(models.Model):
     )  # <-- CHANGED (and removed duplicate)
     first_name = models.CharField(max_length=255, blank=True)  # <-- CHANGED
     last_name = models.CharField(max_length=255, blank=True)  # <-- CHANGED
+    email = models.EmailField(blank=True)
+    university = models.CharField(max_length=255, blank=True)
+    major = models.CharField(max_length=255, blank=True)
+    degree = models.CharField(
+        max_length=20, choices=DEGREE_CHOICES, null=True, blank=True
+    )
     organization = models.ForeignKey(Organization, on_delete=models.DO_NOTHING)
     is_final = models.BooleanField(default=False)
 

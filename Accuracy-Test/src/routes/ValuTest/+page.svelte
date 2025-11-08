@@ -259,6 +259,7 @@
                             >
                                 <ValCardComponent
                                     id={answer}
+                                    haveClose={true}
                                     on:remove={() =>
                                         handleRemoveFromGrid(index)}
                                 />
@@ -311,7 +312,7 @@
                             role="button"
                             tabindex="0"
                         >
-                            <ValCardComponent id={card} />
+                            <ValCardComponent id={card} haveClose={false} />
                         </div>
                     {/if}
                 {/each}
