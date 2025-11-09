@@ -1,6 +1,7 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { error, json } from '@sveltejs/kit';
 import { generatePdfFromUrl } from '$lib/utils/api/pdf-gen';
+import { BASE_internal_URL } from '$lib/utils/constants';
 
 const TARGET_URL = 'https://metasan.co/core/wp-json/metasan/v1/wil_email';
 
@@ -25,7 +26,7 @@ export async function POST(event: RequestEvent) {
 
         const authToken = event.locals?.authToken ?? null;
 
-        const pdfBuffer = await generatePdfFromUrl("http://10.82.203.254:5173/ValuTest/result", authToken);
+        const pdfBuffer = await generatePdfFromUrl(BASE_internal_URL, authToken);
 
         const pdfBase64 = Buffer.from(pdfBuffer).toString('base64');
 
