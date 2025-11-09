@@ -15,25 +15,28 @@ export async function POST(event: RequestEvent) {
             body?: string;
         };
 
-        if (!email || !name || !title || !emailBody) {
+        if (!email || !title || !emailBody) {
+            console.log(email, "email")
+            console.log(title, "title");
+            console.log(emailBody, "emailBody");
             error(400, 'Missing required fields: url, email, name, title, body');
         }
         url = 'https://metasan.co/core/wp-json/metasan/v1/wil_email';
 
         const authToken = event.locals?.authToken ?? null;
 
-        const pdfBuffer = await generatePdfFromUrl("http://172.19.0.1:5173/ValuTest/result", authToken);
+        const pdfBuffer = await generatePdfFromUrl("http://10.82.203.254:5173/ValuTest/result", authToken);
 
         const pdfBase64 = Buffer.from(pdfBuffer).toString('base64');
+
+        console.log(pdfBuffer);
 
         const res = await fetch(TARGET_URL, {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({
                 pdf: pdfBase64,
-                email,
-                name,
-                title,
+                email: email,
                 body: emailBody
             })
         });

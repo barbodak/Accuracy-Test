@@ -6,8 +6,21 @@
     } from "$lib/utils/api/quiz-apis";
     import { onMount } from "svelte";
     import { fly } from "svelte/transition";
+    import { toJalaali } from "jalaali-js";
+    import { goto } from "$app/navigation";
+    import { finalize } from "$lib/utils/api/quiz-apis";
 
     // --- Data Definitions ---
+    let form = {
+        email: "",
+        name: "",
+        title: "",
+        body: "",
+    };
+
+    let sending = false;
+    let resultMsg: string | null = null;
+    let errorMsg: string | null = null;
 
     // Define the structure of the API response
     type QuizResult = {
@@ -17,7 +30,31 @@
         pishraft: number;
         esteghlal: number;
         tofigh: number;
+        quiz_time: string; // Add quiz_time to the type definition
     };
+
+    async function send() {
+        resultMsg = null;
+        errorMsg = null;
+        sending = true;
+        try {
+            const res = await fetch("/api/send-pdf-email", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify(form),
+            });
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || "Request failed");
+            }
+            await res.json();
+            resultMsg = "Email request sent successfully.";
+        } catch (e: any) {
+            errorMsg = e?.message || "Failed to send.";
+        } finally {
+            sending = false;
+        }
+    }
 
     // Define the descriptions for each value
     // Keys MUST match the API property names
@@ -26,7 +63,7 @@
         { title: string; text: string }
     > = {
         tofigh: {
-            title: " توفیق (موفقیت فردی)",
+            title: "توفیق",
             text: "اگر «توفیق» برای شما اهمیت دارد، بهتر است شغلی انتخاب کنید که:\n • با توانایی‌ها و نقاط قوتتان هماهنگ باشد،\n • نتیجه تلاش‌های خود را به‌وضوح ببینید،\n • احساس موفقیت و رضایت از عملکردتان را تجربه کنید.\n\nشما زمانی بیشترین انگیزه را دارید که تلاش‌هایتان به دستاورد مشخصی منجر شود.",
         },
         esteghlal: {
@@ -64,18 +101,35 @@
         description: string;
     }[] = [];
 
-    let email: string;
-    let first_name: string;
-    let last_name: string;
+    let email: string = "";
+    let first_name: string = "";
+    let last_name: string = "";
+    let age: number | null = null;
+    let jalaliDate: string = "";
+    let is_final: boolean;
+    let sex: string = "";
 
     onMount(() => {
         resultsPromise = retreiveQuizAnswer({ quiz_type: "ValuTest" });
         resultsPromise
             .then((data) => {
-                const entries = Object.entries(data) as [
+                const quiz_time_utc = new Date(data.quiz_time);
+                const y = quiz_time_utc.getUTCFullYear();
+                const m = quiz_time_utc.getUTCMonth() + 1;
+                const d = quiz_time_utc.getUTCDate();
+                const jalaliParts = toJalaali(y, m, d);
+                jalaliDate = `${jalaliParts.jy}/${jalaliParts.jm}/${jalaliParts.jd}`;
+
+                const allEntries = Object.entries(data) as [
                     keyof QuizResult,
-                    number,
+                    number | string, // score can be number, quiz_time is string
                 ][];
+
+                // Filter out non-score entries and ensure score is a number
+                const entries = allEntries.filter(
+                    ([key, value]) =>
+                        key !== "quiz_time" && typeof value === "number",
+                ) as [keyof Omit<QuizResult, "quiz_time">, number][]; // Cast to correct type
 
                 entries.sort((a, b) => b[1] - a[1]);
 
@@ -96,13 +150,36 @@
             const account = await retreiveAccount();
 
             if (account) {
-                // By re-assigning these variables, we trigger the reactive 'tests' array to update.
-                email = account.email;
+                form.email = account.email;
+                form.title = `متاسان نمایشگاه کار: گزارش پرسشنامه WIL`;
+                form.body = `باسپاس فراوان`;
                 first_name = account.first_name;
                 last_name = account.last_name;
+                age = account.age;
+                is_final = account.is_final;
+                sex = account.sex;
             }
         } catch (error) {
             console.error("Failed to load user data or quizzes:", error);
+        }
+
+        if (is_final == false) {
+            let formData = {
+                first_name: first_name,
+                last_name: last_name,
+                age: age,
+                sex: sex, // Will be 'M', 'F', or 'O'
+            };
+            try {
+                const submitfinalize = await finalize(formData);
+            } catch (e) {
+                console.error("Failed to finalize account:", e);
+            }
+            try {
+                const submitemail = await send();
+            } catch (e) {
+                console.error("Failed to finalize account:", e);
+            }
         }
     });
 </script>
@@ -111,16 +188,13 @@
     <title>گزارش پرسشنامه ارزش‌های شغلی</title>
 </svelte:head>
 
-<!-- Main container with styling inspired by your reference page -->
 <div
     class="flex flex-col items-center justify-start min-h-screen bg-gray-100 dark:bg-slate-900 font-['Vazirmatn'] py-16"
     dir="rtl"
 >
-    <!-- Use #await to handle loading/error/success states -->
     {#await resultsPromise}
-        <!-- PENDING: Show a loading state -->
         <div
-            class="w-full max-w-3xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-10 text-center"
+            class="w-full max-w-3xl bg-white dark:bg-slate-800 rounded-2xl p-10 text-center"
         >
             <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-4">
                 در حال بارگذاری نتایج...
@@ -128,16 +202,19 @@
             <p class="text-slate-500 dark:text-slate-400">لطفا کمی صبر کنید.</p>
         </div>
     {:then data}
-        <!-- SUCCESS: Show the main results card -->
-        <h1>
-            {first_name}
-            {last_name}
-            {email}
-        </h1>
         <div
-            class="w-full max-w-3xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 sm:p-10 transition-all duration-300"
+            class="w-full max-w-3xl bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 transition-all duration-300"
         >
-            <!-- Header section -->
+            <div class="flex justify-center mb-8">
+                <button on:click={goto("/Signup")}>
+                    <img
+                        src="/images/metasan-logo-fa.svg"
+                        alt="Metasan Logo"
+                        class="h-16 dark:filter dark:invert"
+                    />
+                </button>
+            </div>
+
             <div
                 class="text-center border-b border-slate-200 dark:border-slate-700 pb-6 mb-8"
             >
@@ -146,28 +223,67 @@
                 >
                     گزارش پرسشنامه ارزش‌های شغلی
                 </h2>
+
+                <div
+                    class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-6 text-slate-500 dark:text-slate-400 mb-6"
+                >
+                    {#if first_name && last_name}
+                        <div class="flex items-center gap-1">
+                            <span class="text-sm">نام:</span>
+                            <span
+                                class="font-semibold text-base text-slate-800 dark:text-slate-200"
+                                >{first_name} {last_name}</span
+                            >
+                        </div>
+                    {/if}
+                    {#if age !== null}
+                        {#if first_name && last_name}
+                            <span
+                                class="hidden sm:inline-block text-slate-400 dark:text-slate-600"
+                                >|</span
+                            >
+                        {/if}
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-sm">سن:</span>
+                            <span
+                                class="font-semibold text-base text-slate-800 dark:text-slate-200"
+                                >{age}</span
+                            >
+                        </div>
+                    {/if}
+                    {#if jalaliDate}
+                        {#if (first_name && last_name) || age !== null}
+                            <span
+                                class="hidden sm:inline-block text-slate-400 dark:text-slate-600"
+                                >|</span
+                            >
+                        {/if}
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-sm">تاریخ آزمون:</span>
+                            <span
+                                class="font-semibold text-base text-slate-800 dark:text-slate-200"
+                                >{jalaliDate}</span
+                            >
+                        </div>
+                    {/if}
+                </div>
                 <p
                     class="text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed"
                 >
-در این پرسشنامه ارزش‌هایی که بالاترین نمره را کسب کرده‌اند، نشان‌دهنده‌ی مهم‌ترین اولویت‌های شغلی شما هستند. و ارزش‌های با امتیاز پایین‌تر اولوییت کمتری خواهند داشت.
-شغل‌هایی با شما هماهنگ‌ترند که حداقل دو ارزش اصلی شما را در خود داشته باشند.
+                    در این پرسشنامه ارزش‌هایی که بالاترین نمره را کسب کرده‌اند،
+                    نشان‌دهنده‌ی مهم‌ترین اولویت‌های شغلی شما هستند. و ارزش‌های
+                    با امتیاز پایین‌تر اولوییت کمتری خواهند داشت. شغل‌هایی با
+                    شما هماهنگ‌ترند که حداقل دو ارزش اصلی شما را در خود داشته
+                    باشند.
                 </p>
             </div>
 
-            <!-- Results List -->
             <div class="space-y-6">
-                <!-- Loop through the sorted results and create a card for each -->
                 {#each sortedResults as result, i (result.key)}
-                    <!-- 
-                        This 'in:fly' transition creates the "scroll effect".
-                        Each card will fly in from below (y: 50) with a
-                        staggered delay based on its index (i).
-                    -->
                     <div
-                        class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg p-6 overflow-hidden"
+                        class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-6 overflow-hidden"
                         in:fly={{ y: 50, duration: 600, delay: i * 150 }}
                     >
-                        <!-- Card Header: Title and Score -->
                         <div
                             class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4"
                         >
@@ -181,24 +297,22 @@
                             >
                                 {result.score}
                                 <span
-                                    class="text-base font-medium text-slate-500 dark:text-slate-400"
+                                    class="text-base font-me text-slate-500 dark:text-slate-400"
                                 >
                                     / 30</span
                                 >
                             </span>
                         </div>
 
-                        <!-- Progress Bar -->
                         <div
                             class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3 mb-5"
                         >
                             <div
-                                class="bg-blue-600 h-3 rounded-full transition-all duration-1000 ease-out"
+                                class="bg-pink-500 h-3 rounded-full transition-all duration-1000 ease-out"
                                 style="width: {(result.score / 30) * 100}%"
                             />
                         </div>
 
-                        <!-- Description Text -->
                         <p
                             class="text-base text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line"
                         >
@@ -209,16 +323,15 @@
             </div>
         </div>
     {:catch error}
-        <!-- ERROR: Show an error message -->
         <div
-            class="w-full max-w-3xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-10 text-center"
+            class="w-full max-w-3xl bg-white dark:bg-slate-800 rounded-2xl p-10 text-center"
         >
             <h2 class="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">
                 خطا در بارگذاری
             </h2>
             <p class="text-slate-500 dark:text-slate-400">
-                متاسفانه مشکلی در دریافت نتایج پرسشنامه شما پیش آمد. لطفا صفحه را
-                دوباره بارگذاری کنید.
+                متاسفانه مشکلی در دریافت نتایج پرسشنامه شما پیش آمد. لطفا صفحه
+                را دوباره بارگذاری کنید.
             </p>
             <p class="text-sm text-slate-400 dark:text-slate-500 mt-2">
                 {error.message}

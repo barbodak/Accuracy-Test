@@ -73,7 +73,6 @@ class QuizViewSet(viewsets.ViewSet):
     def calculateValuTestResult(self, quiz):
         logger = logging.getLogger(__name__)
         answers = quiz.answers
-        logger.warning("fuck")
         for i in range(20):
             if answers[i] in (3, 7, 10, 14, 18, 19):
                 quiz.sharayet_kari += (i % 5) + 1

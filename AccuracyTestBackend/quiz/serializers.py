@@ -40,6 +40,8 @@ class ValuTestSerializer(serializers.ModelSerializer):
 
 
 class ValuTestAnswerSerializer(serializers.ModelSerializer):
+    quiz_time = serializers.SlugRelatedField(read_only=True, slug_field="start_time")
+
     class Meta:
         model = ValuTest
         fields = [
@@ -49,4 +51,5 @@ class ValuTestAnswerSerializer(serializers.ModelSerializer):
             "pishraft",
             "esteghlal",
             "tofigh",
+            "quiz_time",
         ]

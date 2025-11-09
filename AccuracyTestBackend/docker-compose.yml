@@ -1,14 +1,12 @@
 services:
-  # # The PostgreSQL Database Service
-  # postgres:
-  #   image: postgres:15.1
-  #   ports:
-  #     - 7887:5432 # Exposes the DB to your host machine on port 7887
-  #   env_file: .env # Configures the database user, password, and name
-  #   volumes:
-  #     - pg_data:/var/lib/postgresql/data # Persists database data
+  postgres:
+    image: postgres:15.1
+    ports:
+      - 7887:5432 # Exposes the DB to your host machine on port 7887
+    env_file: .env # Configures the database user, password, and name
+    volumes:
+      - pg_data:/var/lib/postgresql/data # Persists database data
 
-  # The Django Application Service
   web:
     build: . # Tells Docker Compose to build an image from the Dockerfile in this directory
     ports:
@@ -16,9 +14,9 @@ services:
     volumes:
       - .:/usr/src/app:z # Mounts your project directory into the container for live code changes
     env_file: .env # Provides environment variables to your Django app (e.g., database URL, secret key)
-    # depends_on:
-    #   - postgres # Tells this service to wait until the postgres service is started
+    depends_on:
+      - postgres # Tells this service to wait until the postgres service is started
 
-# # Defines a named volume for persisting PostgreSQL data
-# volumes:
-#   pg_data:
+# Defines a named volume for persisting PostgreSQL data
+volumes:
+  pg_data:

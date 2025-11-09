@@ -32,9 +32,9 @@ export async function GET(event: RequestEvent) {
         return new Response(pdfArray, {
             status: 200,
             headers: {
-                'Content-Type': 'application/text',
+                'Content-Type': 'application/pdf',
 
-                'Content-Disposition': 'attachment; filename="document.txt"',
+                'Content-Disposition': 'attachment; filename="document.pdf"',
 
                 'Content-Length': pdfArray.length.toString(),
 

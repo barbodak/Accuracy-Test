@@ -8,29 +8,15 @@
         last_name: "",
         email: "",
         phone: "",
-        university: "",
+        university: "u",
         degree: "",
-        major: "",
+        major: "m",
         age: null as number | null,
         sex: "", // Will be 'M', 'F', or 'O'
     };
 
     let error: string | null = null; // To display submission errors
     let submitPromise: Promise<any>; // For the async button
-
-    $: {
-        if (formData.degree === "diploma") {
-            formData.university = "diploma";
-            formData.major = "diploma";
-        } else {
-            if (formData.university === "diploma") {
-                formData.university = "";
-            }
-            if (formData.major === "diploma") {
-                formData.major = "";
-            }
-        }
-    }
 
     async function handleSubmit() {
         // Simple validation
@@ -116,9 +102,10 @@
                 type="text"
                 name="first_name"
                 id="first_name"
+                autocomplete="off"
                 bind:value={formData.first_name}
                 class="block w-full rounded-md border-slate-300 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base"
-                placeholder="نام شما"
+                placeholder="نام به زبان فارسی"
                 required
             />
         </div>
@@ -134,9 +121,10 @@
                 type="text"
                 name="last_name"
                 id="last_name"
+                autocomplete="off"
                 bind:value={formData.last_name}
                 class="block w-full rounded-md border-slate-300 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base"
-                placeholder="نام خانوادگی شما"
+                placeholder="نام خانوادگی به زبان فارسی"
                 required
             />
         </div>
@@ -152,6 +140,7 @@
                 type="number"
                 name="age"
                 id="age"
+                autocomplete="off"
                 min="1"
                 bind:value={formData.age}
                 class="block w-full rounded-md border-slate-300 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base"
@@ -192,6 +181,7 @@
                 type="email"
                 name="email"
                 id="email"
+                autocomplete="off"
                 bind:value={formData.email}
                 class="block w-full rounded-md border-slate-300 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base"
                 placeholder="you@gmail.com"
@@ -210,6 +200,7 @@
                 type="phoen"
                 name="phone"
                 id="phone"
+                autocomplete="off"
                 bind:value={formData.phone}
                 class="block w-full rounded-md border-slate-300 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base"
                 placeholder="۰۹۱۲۳۴۵۶۷۸۹"
@@ -231,51 +222,13 @@
                 required
             >
                 <option value="" disabled>لطفا انتخاب کنید...</option>
-                <option value="diploma">دیپلوم</option>
+                <option value="diploma">دیپلم</option>
                 <option value="student">دانشجو</option>
                 <option value="bachelor">کارشناسی</option>
                 <option value="masters">کارشناسی ارشد</option>
                 <option value="doctorate">دکترا</option>
             </select>
         </div>
-
-        {#if formData.degree && formData.degree !== "diploma"}
-            <div>
-                <label
-                    for="university"
-                    class="mb-1 block text-sm font-medium text-slate-700"
-                >
-                    دانشگاه
-                </label>
-                <input
-                    type="text"
-                    name="university"
-                    id="university"
-                    bind:value={formData.university}
-                    class="block w-full rounded-md border-slate-300 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base"
-                    placeholder="دانشگاه شریف"
-                    required
-                />
-            </div>
-
-            <div>
-                <label
-                    for="major"
-                    class="mb-1 block text-sm font-medium text-slate-700"
-                >
-                    رشته تحصیلی
-                </label>
-                <input
-                    type="text"
-                    name="major"
-                    id="major"
-                    bind:value={formData.major}
-                    class="block w-full rounded-md border-slate-300 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base"
-                    placeholder="مهندسی کامپیوتر"
-                    required
-                />
-            </div>
-        {/if}
 
         {#if error}
             <div
