@@ -4,12 +4,12 @@ FROM python:3.10
 WORKDIR /usr/src/app
 
 # Install any required Python packages
-COPY ./requirements.txt .
+COPY AccuracyTestBackend/requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install psycopg2-binary
 RUN pip install -r requirements.txt
 
-ADD . .
+ADD  AccuracyTestBackend/ .
 
 
 ENTRYPOINT ["/bin/sh", "-c" , "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn -b 0.0.0.0:8000 AccuracyTestBackend.wsgi"]
