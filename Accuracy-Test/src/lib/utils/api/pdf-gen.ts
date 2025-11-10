@@ -29,8 +29,8 @@ export async function generatePdfFromUrl(url: string, authToken?: string | null)
         }
 
         await page.goto(url, {
-            // waitUntil: 'networkidle0',
-            waitUntil: 'domcontentloaded',
+            waitUntil: 'networkidle0',
+            // waitUntil: 'domcontentloaded',
         });
 
         await page.addStyleTag({
