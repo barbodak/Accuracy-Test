@@ -10,9 +10,9 @@ export async function generatePdfFromUrl(url: string, authToken?: string | null)
 
         const page = await browser.newPage();
 
-        await page.emulateMediaFeatures([
-            { name: 'prefers-color-scheme', value: 'dark' }
-        ]);
+        // await page.emulateMediaFeatures([
+        //     { name: 'prefers-color-scheme', value: 'dark' }
+        // ]);
 
         if (authToken) {
             const urlObj = new URL(url);
