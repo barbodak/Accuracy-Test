@@ -29,7 +29,8 @@ export async function generatePdfFromUrl(url: string, authToken?: string | null)
         }
 
         await page.goto(url, {
-            waitUntil: 'networkidle0',
+            // waitUntil: 'networkidle0',
+            waitUntil: 'domcontentloaded',
         });
 
         await page.addStyleTag({
@@ -84,7 +85,7 @@ export async function generatePdfFromUrl(url: string, authToken?: string | null)
 
     } catch (error) {
         console.error('Error generating PDF:', error);
-        throw new Error('Could not generate PDF.');
+        throw error;
     } finally {
         if (browser) {
             await browser.close();

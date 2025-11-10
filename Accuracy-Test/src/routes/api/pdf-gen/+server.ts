@@ -6,9 +6,9 @@ import { generatePdfFromUrl } from '$lib/utils/api/pdf-gen'; // Adjust the path 
 // 1. Define the handler for a GET request
 export async function GET(event: RequestEvent) {
     try {
-        const urlToConvert = event.url.searchParams.get('url');
+        const relativeUrl = event.url.searchParams.get('url');
 
-        if (!urlToConvert) {
+        if (!relativeUrl) {
             return new Response('Missing "url" query parameter.', { status: 400 });
         }
 
@@ -16,7 +16,9 @@ export async function GET(event: RequestEvent) {
         // Validate and sanitize the 'urlToConvert' if it comes from user input
         // to prevent SSRF (Server-Side Request Forgery) attacks.
         // For example, ensure it only points to your own domain.
+        //
         // --- END SECURITY NOTE ---
+        const urlToConvert = new URL(relativeUrl, event.url.origin).href;
 
         // Get the auth token from locals (set by hooks.server.ts from cookies)
         const authToken = event.locals.authToken;
