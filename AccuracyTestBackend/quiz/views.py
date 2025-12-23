@@ -55,7 +55,7 @@ class QuizViewSet(viewsets.ViewSet):
                     timezone.now() - quiz.quiz_time.start_time
                 ).seconds > conf.ACU_TEST_PIC_TIMELIMIT_SECONDS:
                     return True
-            case "AcuTest_time":
+            case "AcuTest_text":
                 if (
                     timezone.now() - quiz.quiz_time.start_time
                 ).seconds > conf.ACU_TEST_TEXT_TIMELIMIT_SECONDS:
@@ -70,9 +70,15 @@ class QuizViewSet(viewsets.ViewSet):
                     return True
         return False
 
-    def calculateValuTestResult(self, quiz):
+    def calculateValuTestResult(self, quiz: ValuTest):
         logger = logging.getLogger(__name__)
         answers = quiz.answers
+        quiz.sharayet_kari = 0
+        quiz.tofigh = 0
+        quiz.hemayat = 0
+        quiz.ravabet = 0
+        quiz.esteghlal = 0
+        quiz.pishraft = 0
         for i in range(20):
             if answers[i] in (3, 7, 10, 14, 18, 19):
                 quiz.sharayet_kari += (i % 5) + 1
@@ -87,6 +93,65 @@ class QuizViewSet(viewsets.ViewSet):
             if answers[i] in (1, 6):
                 quiz.tofigh += ((i % 5) + 1) * 3
             quiz.save()
+
+    def calculateAcuTestPicResult(self, quiz: AcuTest_pic):
+        logger = logging.getLogger(__name__)
+        user_answers = quiz.answers
+        key = conf.ACU_TEST_PIC_RES
+        quiz.correct = 0
+        quiz.wrong = 0
+        for i in range(conf.ACU_TEST_PIC_QUESTION_COUNT):
+            if user_answers[i] != 0:
+                if user_answers[i] == key[i]:
+                    quiz.correct += 1
+                else:
+                    quiz.wrong += 1
+        quiz.save()
+
+    def calculateAcuTestTextResult(self, quiz: AcuTest_text):
+        logger = logging.getLogger(__name__)
+        logger.warning("enterd_2")
+        user_answers = quiz.answers
+        key = conf.ACU_TEST_TEXT_RES
+        quiz.correct = 0
+        quiz.wrong = 0
+        quiz.num_of_no = 0
+        quiz.num_of_yes = 0
+        quiz.no_no = 0
+        quiz.no_yes = 0
+        quiz.yes_yes = 0
+        quiz.yes_no = 0
+        for i in range(conf.ACU_TEST_TEXT_QUESTION_COUNT):
+            if user_answers[i] == 1:
+                quiz.num_of_yes += 1
+                if 1 == key[i]:
+                    quiz.correct += 1
+                    quiz.yes_yes += 1
+                else:
+                    quiz.wrong += 1
+                    quiz.yes_no += 1
+            elif user_answers[i] == 2:
+                quiz.num_of_no += 1
+                if 1 == key[i]:
+                    quiz.wrong += 1
+                    quiz.no_yes += 1
+                else:
+                    quiz.correct += 1
+                    quiz.no_no += 1
+        quiz.save()
+
+    def route_calculation(self, quiz_type: str, quiz):
+        logger = logging.getLogger(__name__)
+        logger.warning("enterd_1")
+        match quiz_type:
+            case "ValuTest":
+                self.calculateValuTestResult(quiz)
+
+            case "AcuTest_pic":
+                self.calculateAcuTestPicResult(quiz)
+
+            case "AcuTest_text":
+                self.calculateAcuTestTextResult(quiz)
 
     def startQuiz(self, request, quiz_type):
         logger = logging.getLogger(__name__)
@@ -118,10 +183,8 @@ class QuizViewSet(viewsets.ViewSet):
         quiz.answers = request.data.get("answers")
         quiz.quiz_time.finish_time = timezone.now()
         quiz.quiz_time.save()
+        self.route_calculation(quiz_type, quiz)
         quiz.save()
-        if quiz_type == "ValuTest":
-            self.calculateValuTestResult(quiz)
-            quiz.save()
         return HttpResponse(status=200)
 
     def retrieve(self, request, quiz_type):
@@ -154,6 +217,7 @@ class QuizViewSet(viewsets.ViewSet):
             case "AcuTest_pic":
                 return JsonResponse(AcuTestPicAnswerSerializer(quiz).data)
             case "AcuTest_text":
+                # logger.warning(JsonResponse(AcuTestTextAnswerSerializer(quiz).data))
                 return JsonResponse(AcuTestTextAnswerSerializer(quiz).data)
             case "ValuTest":
                 return JsonResponse(ValuTestAnswerSerializer(quiz).data)

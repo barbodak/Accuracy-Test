@@ -28,7 +28,16 @@ class AcuTestTextSerializer(serializers.ModelSerializer):
 class AcuTestTextAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = AcuTest_text
-        fields = ["correct", "wrong"]
+        fields = [
+            "correct",
+            "wrong",
+            "num_of_no",
+            "num_of_yes",
+            "no_no",
+            "no_yes",
+            "yes_no",
+            "yes_yes",
+        ]
 
 
 class ValuTestSerializer(serializers.ModelSerializer):

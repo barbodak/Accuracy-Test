@@ -123,6 +123,7 @@ class SignupSerializer(serializers.Serializer):
             degree=validated_data.get("degree"),
             organization=organization,
             valTest_permition=True,  # Give permission to take value test
+            acuTest_permition=True,  # Give permission to take value test
         )
 
         return account
