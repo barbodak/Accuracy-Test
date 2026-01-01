@@ -1,11 +1,9 @@
-FROM node:18.19.0 AS node-build
-
 WORKDIR /usr/src/app
 
-COPY Accuracy-Test/package*.json ./
+COPY package*.json ./
 RUN npm install
 
-COPY Accuracy-Test/ .
+COPY . .
 
 RUN npm run build
 

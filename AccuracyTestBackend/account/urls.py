@@ -8,4 +8,5 @@ from . import views
 urlpatterns = [
     path("retrieve/", views.AccountViewSet.as_view({"get": "retrieve"})),
     path("finalize/", views.AccountViewSet.as_view({"post": "finalize"})),
+    path("signup/", views.SignupView.as_view(), name="signup"),
 ]

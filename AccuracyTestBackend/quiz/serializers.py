@@ -28,7 +28,16 @@ class AcuTestTextSerializer(serializers.ModelSerializer):
 class AcuTestTextAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = AcuTest_text
-        fields = ["correct", "wrong"]
+        fields = [
+            "correct",
+            "wrong",
+            "num_of_no",
+            "num_of_yes",
+            "no_no",
+            "no_yes",
+            "yes_no",
+            "yes_yes",
+        ]
 
 
 class ValuTestSerializer(serializers.ModelSerializer):
@@ -40,6 +49,8 @@ class ValuTestSerializer(serializers.ModelSerializer):
 
 
 class ValuTestAnswerSerializer(serializers.ModelSerializer):
+    quiz_time = serializers.SlugRelatedField(read_only=True, slug_field="start_time")
+
     class Meta:
         model = ValuTest
         fields = [
@@ -49,4 +60,5 @@ class ValuTestAnswerSerializer(serializers.ModelSerializer):
             "pishraft",
             "esteghlal",
             "tofigh",
+            "quiz_time",
         ]

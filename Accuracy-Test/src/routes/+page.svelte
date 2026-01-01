@@ -48,7 +48,7 @@
     ];
     onMount(async () => {
         if (!getCookies("auth_token")) {
-            goto("/Login");
+            goto("/Signup");
             return;
         } else {
             console.log("was here");
@@ -123,17 +123,17 @@
             <div>
                 {#if getCookies("auth_token")}
                     <button
-                        on:click={handleLogout}
-                        class="rounded-lg bg-red-500 px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300"
+                        on:click={() => goto("/Signup")}
+                        class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300"
                     >
-                        Logout
+                        Signup
                     </button>
                 {:else}
                     <button
-                        on:click={() => goto("/Login")}
+                        on:click={() => goto("/Signup")}
                         class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300"
                     >
-                        Login
+                        Signup
                     </button>
                 {/if}
             </div>

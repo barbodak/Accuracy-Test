@@ -28,6 +28,12 @@ class AcuTest_text(models.Model):
     quiz_time = models.OneToOneField(Quiztime, on_delete=models.DO_NOTHING)
     correct = models.IntegerField(default=0)
     wrong = models.IntegerField(default=0)
+    num_of_yes = models.IntegerField(default=0)
+    num_of_no = models.IntegerField(default=0)
+    yes_yes = models.IntegerField(default=0)
+    yes_no = models.IntegerField(default=0)
+    no_no = models.IntegerField(default=0)
+    no_yes = models.IntegerField(default=0)
 
     def __str__(self) -> str:
         return f"{self.user.username} | {self.quiz_time.start_time}"

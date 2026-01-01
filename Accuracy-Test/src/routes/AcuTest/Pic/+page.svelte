@@ -146,7 +146,7 @@
                     class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200"
                     on:click={() => {
                         handleSubmit();
-                        goto("/AcuTest/Pic/start");
+                        goto("/AcuTest/result");
                     }}
                 >
                     End Test
@@ -172,7 +172,7 @@
             <div class="flex justify-center gap-4">
                 <button
                     class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200"
-                    on:click={() => goto("/")}
+                    on:click={() => goto("/AcuTest/Text/start")}
                 >
                     Start the second prt
                 </button>

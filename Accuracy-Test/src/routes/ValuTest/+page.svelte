@@ -259,6 +259,7 @@
                             >
                                 <ValCardComponent
                                     id={answer}
+                                    haveClose={true}
                                     on:remove={() =>
                                         handleRemoveFromGrid(index)}
                                 />
@@ -276,12 +277,12 @@
             <header class="w-full bg-white dark:bg-slate-800 z-20 shadow-md">
                 <nav class="container mx-auto px-4 sm:px-6 py-3">
                     <div class="flex justify-between items-center">
-                        <div class="text-xl font-semibold">WIL پرسشنامه</div>
+                        <div class="text-xl font-semibold">WIL</div>
                         <button
                             class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-bold focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition-colors"
                             on:click={handleSubmit}
                         >
-                            پایان آزمون
+                            پایان
                         </button>
                     </div>
                 </nav>
@@ -311,7 +312,7 @@
                             role="button"
                             tabindex="0"
                         >
-                            <ValCardComponent id={card} />
+                            <ValCardComponent id={card} haveClose={false} />
                         </div>
                     {/if}
                 {/each}
@@ -335,14 +336,14 @@
             on:close={() => (isOverlayOpen = false)}
         >
             {#if hasFilledEverything()}
-                <h3 class="text-xl font-bold mb-4">پایان آزمون</h3>
-                <p>آیا مطمئن هستید که می‌خواهید آزمون را تمام کنید؟</p>
+                <h3 class="text-xl font-bold mb-4">پایان پرسشنامه</h3>
+                <p>آیا مطمئن هستید که می‌خواهید پرسشنامه را تمام کنید؟</p>
                 <div class="flex gap-4 mt-6">
                     <button
                         class="flex-1 px-4 py-2 bg-slate-600 hover:bg-slate-700 rounded-lg text-white font-bold transition-colors"
                         on:click={() => (isOverlayOpen = false)}
                     >
-                        ادامه آزمون
+                        ادامه پرسشنامه
                     </button>
                     <button
                         class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-bold transition-colors"
@@ -353,7 +354,7 @@
                 </div>
             {:else}
                 <h3 class="text-xl font-bold mb-4">خطا</h3>
-                <p>لطفا پیش از اتمام آزمون تمامی خانه‌ها را پر کنید.</p>
+                <p>لطفا پیش از اتمام پرسشنامه تمامی خانه‌ها را پر کنید.</p>
                 <div class="flex gap-4 mt-6">
                     <button
                         class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-bold transition-colors"

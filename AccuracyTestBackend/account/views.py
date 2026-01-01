@@ -1,15 +1,18 @@
 from django.shortcuts import render
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
 from django.contrib.auth.models import User
+from django.contrib.auth import login
 # from django.http import HttpResponse # <-- DO NOT USE
 # from django.http.response import JsonResponse # <-- DO NOT USE
 
 # --- DRF Imports ---
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 from knox.auth import TokenAuthentication
+from knox.models import AuthToken
 
-from .serializer import AccountSerializer
+from .serializer import AccountSerializer, SignupSerializer
 from .models import Account
 import logging
 
@@ -64,4 +67,29 @@ class AccountViewSet(viewsets.ViewSet):
             return Response(response_serializer.data, status=status.HTTP_200_OK)
         else:
             # Use DRF's Response to return the validation errors
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SignupView(APIView):
+    """View for user signup that creates User, Account, and returns authentication token"""
+
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, format=None):
+        serializer = SignupSerializer(data=request.data)
+        logger = logging.getLogger(__name__)
+        logger.warning(request.data)
+
+        if serializer.is_valid():
+            account = serializer.save()
+
+            login(request, account.user)
+
+            token = AuthToken.objects.create(account.user)[1]
+
+            return Response(
+                {"token": token, "account": AccountSerializer(account).data},
+                status=status.HTTP_201_CREATED,
+            )
+        else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

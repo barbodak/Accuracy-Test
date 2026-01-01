@@ -3,6 +3,7 @@
     import { createEventDispatcher } from "svelte";
 
     export let id: number;
+    export let haveClose: Boolean;
     $: card = cardData[id];
 
     const dispatch = createEventDispatcher();
@@ -11,29 +12,31 @@
 <div
     class="w-full h-full flex flex-col bg-white rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 overflow-hidden border border-slate-200 select-none relative group"
 >
-    <button
-        on:click|stopPropagation={() => dispatch("remove")}
-        class="remove-button"
-        aria-label="Remove card"
-    >
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="3"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            ><line x1="18" y1="6" x2="6" y2="18"></line><line
-                x1="6"
-                y1="6"
-                x2="18"
-                y2="18"
-            ></line></svg
+    {#if haveClose == true}
+        <button
+            on:click|stopPropagation={() => dispatch("remove")}
+            class="remove-button"
+            aria-label="Remove card"
         >
-    </button>
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                ><line x1="18" y1="6" x2="6" y2="18"></line><line
+                    x1="6"
+                    y1="6"
+                    x2="18"
+                    y2="18"
+                ></line></svg
+            >
+        </button>
+    {/if}
 
     <div class="card-letter-section bg-slate-50">
         <span
