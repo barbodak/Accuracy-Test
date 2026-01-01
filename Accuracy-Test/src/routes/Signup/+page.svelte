@@ -53,7 +53,7 @@
         try {
             await submitPromise; // Wait for the promise to resolve
             // Success! Redirect to the dashboard.
-            await goto("/ValuTest/start"); // <-- Or wherever your main app is
+            await goto("/AcuTest/Text/start"); // <-- Or wherever your main app is
         } catch (e) {
             console.error("Failed to Signup:", e);
             error = "خطایی رخ داد. لطفا دوباره تلاش کنید.";
@@ -80,11 +80,34 @@
         on:submit|preventDefault={handleSubmit}
     >
         <div class="flex justify-center">
-            <img
-                src="/images/metasan-logo-fa.svg"
-                alt="Metasan Logo"
-                class="h-12 w-auto"
-            />
+            <!-- fill heare with a good looking text for the top of a signup page -->
+        </div>
+        <div class="mb-8 flex flex-col items-center text-center">
+            <div
+                class="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 text-indigo-600"
+            >
+                <!-- Simple User Icon SVG -->
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="h-8 w-8"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                    />
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-slate-800">
+                تکمیل اطلاعات کاربری
+            </h1>
+            <p class="mt-2 text-sm text-slate-500">
+                برای شروع آزمون، لطفاً مشخصات فردی و تحصیلی خود را وارد کنید.
+            </p>
         </div>
 
         <!-- <h2 class="text-center text-2xl font-bold text-slate-800"> -->

@@ -187,7 +187,7 @@
                     گزارش جامع ارزیابی
                 </h1>
                 <p class="text-slate-500 font-medium">
-                    تحلیل دقت و تمرکز شناختی (AcuTest)
+                    تحلیل دقت و تمرکز شناختی
                 </p>
 
                 <div class="flex flex-wrap justify-center gap-3 mt-4 pt-4">
