@@ -43,7 +43,7 @@
         const calculatedCorrect = data.no_no + data.yes_yes;
         const calculatedWrong = data.no_yes + data.yes_no;
         // Check if API returns unanswered, otherwise default to 0
-        const unanswered = data.unanswered || 0;
+        const unanswered = 90 - calculatedCorrect - calculatedCorrect;
 
         const totalAttempts = calculatedCorrect + calculatedWrong;
         const accuracy =
@@ -83,7 +83,7 @@
         const totalAttempts = data.correct + data.wrong;
         const accuracy =
             totalAttempts > 0 ? (data.correct / totalAttempts) * 100 : 0;
-        const unanswered = data.unanswered || 0;
+        const unanswered = 42 - totalAttempts;
 
         return {
             correctCount: data.correct,
