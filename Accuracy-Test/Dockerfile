@@ -1,10 +1,24 @@
+# Use the official Bun image
+FROM oven/bun:1 as builder
+
 WORKDIR /usr/src/app
 
-COPY package*.json ./
-RUN npm install
+# Copy package files first to cache dependencies
+COPY package.json bun.lock ./
 
+# Install dependencies (frozen-lockfile ensures exact versions)
+RUN bun install --frozen-lockfile
+
+# Copy the rest of the source code
 COPY . .
 
-RUN npm run build
+# Build the app
+RUN bun run build
 
-ENTRYPOINT [ "/bin/sh", "-c" , "node build" ]
+# Expose the port
+EXPOSE 3000
+
+# Start the server using Bun
+# Note: adapter-node creates a "build/index.js" file by default
+CMD ["bun", "build/index.js"]
+
