@@ -48,36 +48,36 @@ ACU_TEST_PIC_RES = [
 ]
 ACU_TEST_TEXT_RES = [
     # Page 1 (photo_1.jpg)
-    1,
+    2,
+    2,
     2,
     1,
-    1,
     2,  # Block 1
-    1,
+    2,
     1,
     1,
     1,
     2,  # Block 2
     1,
-    1,
+    2,
     2,
     1,
-    2,  # Block 3
+    1,  # Block 3
     2,
-    1,
-    2,
-    1,
-    2,  # Block 4
     2,
     1,
     1,
+    1,  # Block 4
+    1,
     2,
+    2,
+    1,
     1,  # Block 5
-    2,
-    2,
     1,
     1,
-    1,  # Block 6
+    2,
+    2,
+    2,  # Block 6
     # Page 2 (photo_2.jpg)
     2,
     2,
@@ -110,36 +110,36 @@ ACU_TEST_TEXT_RES = [
     2,
     1,  # Block 6
     # Page 3 (photo_3.jpg)
-    2,
-    2,
+    1,
     2,
     1,
+    1,
     2,  # Block 1
-    2,
+    1,
     1,
     1,
     1,
     2,  # Block 2
     1,
-    2,
-    2,
-    1,
-    1,  # Block 3
-    2,
-    2,
-    1,
-    1,
-    1,  # Block 4
     1,
     2,
+    1,
+    2,  # Block 3
     2,
     1,
+    2,
+    1,
+    2,  # Block 4
+    2,
+    1,
+    1,
+    2,
     1,  # Block 5
-    1,
-    1,
     2,
     2,
-    2,  # Block 6
+    1,
+    1,
+    1,  # Block 6
 ]
 
 

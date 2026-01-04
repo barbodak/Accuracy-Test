@@ -4,7 +4,7 @@
 export const textQuizQuestions = [
     // From image_f2293d.png
     { text1: 'Mei Jean Wholesaler', text2: 'Mei Jeen Wholesaler' },
-    { text1: 'Teeterboard', text2: 'Teeterboard' },
+    { text1: 'Teeterboard', text2: 'Teetebooard' },
     { text1: 'Atlas Flagg, Inc.', text2: 'Atlas Flag, Inc.' },
     { text1: 'C.G. Munguia', text2: 'C.G. Munguia' },
     { text1: 'Q & Q Quaint Bazaar', text2: 'Q & Q Quaint Bazar' },
@@ -16,7 +16,7 @@ export const textQuizQuestions = [
     { text1: 'I.K. Season Corp.', text2: 'I.K. Season Corp.' },
     { text1: "Cole's Heat Systems", text2: "Cole's Heat Systens" },
     { text1: 'Ridgewood Writers', text2: 'Ridgewood Writers' },
-    { text1: 'Progressive Svc.', text2: 'Progresive Svc.' },
+    { text1: 'Progressive Svc.', text2: 'Progressive Svc.' },
     { text1: 'Cai Cheung Wax Co.', text2: 'Cai Cheung Wax Co.' },
     { text1: 'Wraner Olukayode', text2: 'Warner Olukayode' },
     { text1: 'Capital Press Center', text2: 'Capitol Press Center' },
@@ -49,7 +49,7 @@ export const textQuizQuestions = [
     { text1: 'Cue Comic', text2: 'Cue Comic' },
     { text1: 'T.A. Bowles', text2: 'T.A. Bowls' },
     { text1: 'Abbey Dwayne', text2: 'Abbey Dwaayne' },
-    { text1: 'Sunbeam Lamps', text2: 'Sunbin R. Lamps' },
+    { text1: 'Sunbeam Lamps', text2: 'Sunbeam Lamps' },
     { text1: 'Waylan R. Massell', text2: 'Waybin R. Massell' },
     { text1: 'Rolon Rodes', text2: 'Rolon Rodes' },
     { text1: 'Genro Dawson Ed.', text2: 'Jenro Dawson Ed.' },
