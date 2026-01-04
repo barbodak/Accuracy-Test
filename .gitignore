@@ -9,3 +9,4 @@ pycache/
 *.lockb
 *.lock-wscript
 *.log
+AccuracyTestBackend/general.log
