@@ -30,21 +30,24 @@ class QuizViewSet(viewsets.ViewSet):
 
     def get_quiz(self, quiz_type, user) -> AcuTest_pic | AcuTest_text | ValuTest | None:
         acc = Account.objects.get(user=user)
+        logger = logging.getLogger(__name__)
+        logger.warning(acc)
         match quiz_type:
             case "AcuTest_pic":
-                if acc.acuTest_permition is False:
+                if acc.acuTest_permission is False:
                     return None
-                quiz = AcuTest_pic.objects.get(user=user)
+                quiz = AcuTest_pic.objects.get(account=acc)
             case "AcuTest_text":
-                if acc.acuTest_permition is False:
+                if acc.acuTest_permission is False:
                     return None
-                quiz = AcuTest_text.objects.get(user=user)
+                quiz = AcuTest_text.objects.get(account=acc)
             case "ValuTest":
-                if acc.valTest_permition is False:
+                if acc.valuTest_permission is False:
                     return None
-                quiz = ValuTest.objects.get(user=user)
+                quiz = ValuTest.objects.get(account=acc)
             case _:  # Default case for unmatched quiz_type
                 raise ValueError(f"Unrecognized quiz type: {quiz_type}")
+        logger.warning(quiz)
         return quiz
 
     def quizHasEnded(self, quiz, quiz_type):

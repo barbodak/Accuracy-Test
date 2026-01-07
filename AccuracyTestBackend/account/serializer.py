@@ -34,8 +34,8 @@ class AccountSerializer(serializers.ModelSerializer):
             "username",
             "organization_name",
             "is_final",
-            "acuTest_permition",
-            "valTest_permition",
+            "acuTest_permission",
+            "valuTest_permission",
         ]
 
         # We mark 'is_final' as read-only because views.py sets it manually
@@ -43,8 +43,8 @@ class AccountSerializer(serializers.ModelSerializer):
             "username",
             "organization_name",
             "is_final",
-            "acuTest_permition",
-            "valTest_permition",
+            "acuTest_permission",
+            "valuTest_permission",
         ]
 
         # Mark the writeable fields as 'required' for the finalize step
@@ -108,7 +108,7 @@ class SignupSerializer(serializers.Serializer):
             last_name=validated_data.get("last_name", ""),
         )
 
-        # Create Account with valTest_permition=True
+        # Create Account with valuTest_permission=True
         # The signal will automatically create the ValuTest object
         account = Account.objects.create(
             user=user,
@@ -122,8 +122,8 @@ class SignupSerializer(serializers.Serializer):
             major=validated_data.get("major", ""),
             degree=validated_data.get("degree"),
             organization=organization,
-            # valTest_permition=True,  # Give permission to take value test
-            acuTest_permition=True,  # Give permission to take value test
+            # valuTest_permission=True,  # Give permission to take value test
+            acuTest_permission=True,  # Give permission to take value test
         )
 
         return account

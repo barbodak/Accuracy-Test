@@ -59,8 +59,8 @@
 
             if (account) {
                 // By re-assigning these variables, we trigger the reactive 'tests' array to update.
-                hasValPerm = account.valTest_permition;
-                hasAcuPerm = account.acuTest_permition;
+                hasValPerm = account.valuTest_permission;
+                hasAcuPerm = account.acuTest_permission;
                 first_name = account.first_name;
                 last_name = account.last_name;
             }

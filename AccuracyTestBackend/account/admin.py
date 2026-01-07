@@ -1,178 +1,182 @@
 from django.contrib import admin
-from django.urls import path
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
-from django.contrib import messages
-from . import models
-from .forms import BulkCreateForm  # Assuming this form exists in forms.py
-import csv
-import secrets
-import string
-import io
+from django.utils.html import format_html
 
-from quiz.models import AcuTest_pic, AcuTest_text, Quiztime, ValuTest
+from .models import Account, Organization
 
 
-class AccountAdmin(admin.ModelAdmin):
-    # This tells the admin to use our custom template for the changelist (to add the button)
-    change_list_template = "admin/accounts/account/changelist.html"
+class AccountInline(admin.StackedInline):
+    """Inline Account in User admin"""
 
-    def get_urls(self):
-        """Adds our custom URL to the admin URLs."""
-        urls = super().get_urls()
-        custom_urls = [
-            path(
-                "create-bulk/",
-                self.admin_site.admin_view(self.bulk_create_view),
-                name="accounts-bulk-create",
-            ),
-        ]
-        return custom_urls + urls
+    model = Account
+    can_delete = False
+    verbose_name_plural = "Account"
+    fk_name = "user"
+    fields = (
+        ("first_name", "last_name"),
+        ("age", "sex"),
+        ("email", "phone"),
+        ("university", "major", "degree"),
+        "organization",
+        ("acuTest_permission", "valutest_permission"),
+        "is_final",
+    )
 
-    def bulk_create_view(self, request):
-        """The view for our custom admin page, now using bulk_create."""
-        form = BulkCreateForm()
 
-        if request.method == "POST":
-            form = BulkCreateForm(request.POST)
-            if form.is_valid():
-                number = form.cleaned_data["number_of_accounts"]
-                organization = form.cleaned_data["organization"]
-                acu_perm = form.cleaned_data["acuTest_permition"]
-                val_perm = form.cleaned_data["valTest_permition"]
+class CustomUserAdmin(BaseUserAdmin):
+    """Extended User admin with Account inline"""
 
-                users_to_create = []
-                accounts_to_create = []
-                csv_rows = [["username", "password"]]
+    inlines = (AccountInline,)
+    list_display = (
+        "username",
+        "email",
+        "get_full_name",
+        "get_organization",
+        "is_active",
+    )
+    list_select_related = ("account",)
 
-                # 1. Get all existing usernames ONCE to check for conflicts in memory.
-                # This is much faster than querying the DB for every new user.
-                existing_usernames = set(
-                    User.objects.values_list("username", flat=True)
-                )
+    def get_full_name(self, obj):
+        if hasattr(obj, "account"):
+            return f"{obj.account.first_name} {obj.account.last_name}"
+        return "-"
 
-                for _ in range(number):
-                    # 2. Generate credentials
-                    password = secrets.token_urlsafe(12)
-                    username = self.generate_unique_username(
-                        existing_usernames, length=12
-                    )
+    get_full_name.short_description = "Full Name"
 
-                    # Add to our set so the *next* username we generate
-                    # doesn't conflict with one in this same batch.
-                    existing_usernames.add(username)
+    def get_organization(self, obj):
+        if hasattr(obj, "account") and obj.account.organization:
+            return obj.account.organization.name
+        return "-"
 
-                    # 3. Prepare the User object (without saving)
-                    user = User(username=username)
-                    user.set_password(password)  # Hash the password
-                    users_to_create.append(user)
+    get_organization.short_description = "Organization"
 
-                    # Add to our list for the CSV
-                    csv_rows.append([username, password])
 
-                try:
-                    # 4. Create all Users in ONE database query
-                    # Note: bulk_create returns the list of created objects,
-                    # (on most dbs, like Postgres) complete with their new IDs.
-                    created_users = User.objects.bulk_create(users_to_create)
+# Re-register User with custom admin
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)
 
-                    # 5. Prepare the Account objects
-                    for user in created_users:
-                        accounts_to_create.append(
-                            models.Account(
-                                user=user,
-                                organization=organization,
-                                acuTest_permition=acu_perm,
-                                valTest_permition=val_perm,
-                                is_final=False,
-                            )
-                        )
 
-                    # 6. Create all Accounts in a SECOND database query
-                    models.Account.objects.bulk_create(accounts_to_create)
+@admin.register(Organization)
+class OrganizationAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "account_count")
+    search_fields = ("name",)
+    ordering = ("name",)
 
-                    qt_for_valu = Quiztime.objects.bulk_create(
-                        [Quiztime() for _ in range(number)]
-                    )
-                    qt_for_pic = Quiztime.objects.bulk_create(
-                        [Quiztime() for _ in range(number)]
-                    )
-                    qt_for_text = Quiztime.objects.bulk_create(
-                        [Quiztime() for _ in range(number)]
-                    )
-
-                    # 4. Prepare the tests by associating users with their quiztimes
-                    valu_tests = []
-                    pic_tests = []
-                    text_tests = []
-
-                    for i, user in enumerate(created_users):
-                        valu_tests.append(
-                            ValuTest(
-                                user=user, quiz_time=qt_for_valu[i], answers=[0] * 30
-                            )
-                        )
-                        pic_tests.append(
-                            AcuTest_pic(
-                                user=user, quiz_time=qt_for_pic[i], answers=[0] * 42
-                            )
-                        )
-                        text_tests.append(
-                            AcuTest_text(
-                                user=user, quiz_time=qt_for_text[i], answers=[0] * 90
-                            )
-                        )
-
-                    # 5. Bulk create all the tests
-                    ValuTest.objects.bulk_create(valu_tests)
-                    AcuTest_pic.objects.bulk_create(pic_tests)
-                    AcuTest_text.objects.bulk_create(text_tests)
-
-                except Exception as e:
-                    messages.error(request, f"Error during bulk creation: {e}")
-                    return redirect(".")
-
-                # 7. Create and return the CSV
-                csv_buffer = io.StringIO()
-                writer = csv.writer(csv_buffer)
-                writer.writerows(csv_rows)
-
-                messages.success(
-                    request,
-                    f"Successfully created {len(created_users)} accounts.",
-                )
-
-                csv_buffer.seek(0)
-                response = HttpResponse(csv_buffer, content_type="text/csv")
-                response["Content-Disposition"] = (
-                    'attachment; filename="new_accounts.csv"'
-                )
-                return response
-
-        # This context is needed for the admin template
-        context = dict(
-            self.admin_site.each_context(request),
-            title="Bulk Create Accounts",
-            form=form,
+    def account_count(self, obj):
+        count = obj.accounts.count()
+        return format_html(
+            '<span style="color: {};">{}</span>',
+            "green" if count > 0 else "gray",
+            count,
         )
-        return render(request, "admin/accounts/account/bulk_create.html", context)
 
-    def generate_unique_username(self, existing_usernames, length=10):
-        """
-        Generates a random, unique username by checking against an
-        in-memory set of existing usernames.
-        """
-        alphabet = string.ascii_lowercase + string.digits
-        while True:
-            # We fix the bug here: check for "user_..." not just the random part
-            username = "user_" + "".join(
-                secrets.choice(alphabet) for _ in range(length)
-            )
-            if username not in existing_usernames:
-                return username
+    account_count.short_description = "Accounts"
 
 
-# Register your models here
-admin.site.register(models.Account, AccountAdmin)  # Use our new AccountAdmin
-admin.site.register(models.Organization)
+@admin.register(Account)
+class AccountAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "full_name",
+        "user",
+        "age",
+        "sex",
+        "organization",
+        "degree",
+        "quiz_permissions",
+        "is_final",
+    )
+    list_display_links = ("id", "full_name")
+    list_filter = (
+        "sex",
+        "degree",
+        "organization",
+        "acuTest_permission",
+        "valuTest_permission",
+        "is_final",
+    )
+    search_fields = (
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+        "user__username",
+        "university",
+        "major",
+    )
+    list_select_related = ("user", "organization")
+    ordering = ("-id",)
+    list_per_page = 25
+
+    fieldsets = (
+        ("User Link", {"fields": ("user",)}),
+        (
+            "Personal Information",
+            {
+                "fields": (
+                    ("first_name", "last_name"),
+                    ("age", "sex"),
+                    ("email", "phone"),
+                )
+            },
+        ),
+        (
+            "Education",
+            {
+                "fields": (
+                    "university",
+                    ("major", "degree"),
+                )
+            },
+        ),
+        ("Organization", {"fields": ("organization",)}),
+        (
+            "Permissions & Status",
+            {
+                "fields": (
+                    ("acuTest_permission", "valuTest_permission"),
+                    "is_final",
+                ),
+                "classes": ("collapse",),
+            },
+        ),
+    )
+
+    readonly_fields = ("user",)
+
+    def full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}" or "-"
+
+    full_name.short_description = "Name"
+
+    def quiz_permissions(self, obj):
+        perms = []
+        if obj.acuTest_permission:
+            perms.append("🖼️ Acu")
+        if obj.valuTest_permission:
+            perms.append("📝 Val")
+        return " | ".join(perms) if perms else "❌ None"
+
+    quiz_permissions.short_description = "Quiz Permissions"
+
+    actions = [
+        "grant_acuTest_permission",
+        "grant_valuTest_permission",
+        "revoke_all_permissions",
+    ]
+
+    @admin.action(description="Grant AcuTest permission")
+    def grant_acuTest_permission(self, request, queryset):
+        updated = queryset.update(acuTest_permission=True)
+        self.message_user(request, f"{updated} account(s) granted AcuTest permission.")
+
+    @admin.action(description="Grant ValuTest permission")
+    def grant_valuTest_permission(self, request, queryset):
+        updated = queryset.update(valuTest_permission=True)
+        self.message_user(request, f"{updated} account(s) granted ValuTest permission.")
+
+    @admin.action(description="Revoke all quiz permissions")
+    def revoke_all_permissions(self, request, queryset):
+        updated = queryset.update(acuTest_permission=False, valutest_permission=False)
+        self.message_user(request, f"{updated} account(s) had permissions revoked.")

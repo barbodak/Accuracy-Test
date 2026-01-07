@@ -13,16 +13,14 @@ def create_related_quizzes(sender, instance, created, **kwargs):
     """
     if created:
         # This code will now only run ONCE when a new Account is made.
-        if not ValuTest.objects.filter(user=instance.user).exists():
+        if not ValuTest.objects.filter(account=instance).exists():
             q1 = Quiztime.objects.create()
-            ValuTest.objects.create(user=instance.user, quiz_time=q1, answers=[0] * 30)
+            ValuTest.objects.create(account=instance, quiz_time=q1, answers=[0] * 30)
 
-        if not AcuTest_pic.objects.filter(user=instance.user).exists():
+        if not AcuTest_pic.objects.filter(account=instance).exists():
             q1 = Quiztime.objects.create()
             q2 = Quiztime.objects.create()
-            AcuTest_pic.objects.create(
-                user=instance.user, quiz_time=q1, answers=[0] * 42
-            )
+            AcuTest_pic.objects.create(account=instance, quiz_time=q1, answers=[0] * 42)
             AcuTest_text.objects.create(
-                user=instance.user, quiz_time=q2, answers=[0] * 90
+                account=instance, quiz_time=q2, answers=[0] * 90
             )

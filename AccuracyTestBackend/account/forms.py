@@ -9,5 +9,7 @@ class BulkCreateForm(forms.Form):
     organization = forms.ModelChoiceField(
         queryset=Organization.objects.all(), required=True
     )
-    acuTest_permition = forms.BooleanField(required=False, label="AcuTest Permission")
-    valTest_permition = forms.BooleanField(required=False, label="ValTest Permission")
+    acuTest_permission = forms.BooleanField(required=False, label="AcuTest Permission")
+    valuTest_permission = forms.BooleanField(
+        required=False, label="ValuTest Permission"
+    )

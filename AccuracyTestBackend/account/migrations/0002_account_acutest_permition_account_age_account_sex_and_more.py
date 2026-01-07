@@ -4,31 +4,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0001_initial'),
+        ("account", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='account',
-            name='acuTest_permition',
+            model_name="account",
+            name="acuTest_permition",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='account',
-            name='age',
+            model_name="account",
+            name="age",
             field=models.IntegerField(default=20),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='account',
-            name='sex',
-            field=models.TextField(choices=[(None, '(Unknown)'), ('MALE ', 'MALE'), ('FEMALE ', 'FEMALE')], default='(Unknown)'),
+            model_name="account",
+            name="sex",
+            field=models.TextField(
+                choices=[(None, "(Unknown)"), ("MALE ", "MALE"), ("FEMALE ", "FEMALE")],
+                default="(Unknown)",
+            ),
         ),
         migrations.AddField(
-            model_name='account',
-            name='valTest_permition',
+            model_name="account",
+            name="valTest_permition",
             field=models.BooleanField(default=False),
         ),
     ]
