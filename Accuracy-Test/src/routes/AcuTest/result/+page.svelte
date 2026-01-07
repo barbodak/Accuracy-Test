@@ -3,9 +3,10 @@
         retreiveQuizAnswer,
         retreiveAccount,
     } from "$lib/utils/api/quiz-apis";
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
     import { fly } from "svelte/transition";
     import { toJalaali } from "jalaali-js";
+    import { invalidateAll } from "$app/navigation"; // To refresh data without full reload
 
     // --- Types ---
     type TextQuizResult = {
@@ -23,6 +24,74 @@
         wrong: number;
         unanswered?: number; // Added optional field
     };
+
+    export let data;
+
+    const ACU_TEST_PIC_TIMELIMIT_SECONDS = 60 * 5 + 11; // 311 seconds
+    const ACU_TEST_TEXT_TIMELIMIT_SECONDS = 60 * 6 + 11; // 371 seconds
+
+    // State for timers
+    let textQuizRemaining = 0;
+    let picQuizRemaining = 0;
+    let timerInterval: number;
+
+    // Helper to format seconds into MM:SS
+    function formatTime(seconds: number) {
+        if (seconds <= 0) return "00:00";
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return `${m}:${s.toString().padStart(2, "0")}`;
+    }
+
+    function calculateTimeRemaining(
+        startTimeStr: number,
+        limitSeconds: number,
+    ) {
+        if (!startTimeStr) return 0;
+        const startTime = new Date(startTimeStr).getTime();
+        const endTime = startTime + limitSeconds * 1000;
+        const now = Date.now();
+        const diff = Math.floor((endTime - now) / 1000);
+        return diff > 0 ? diff : 0;
+    }
+
+    function updateTimers() {
+        // 1. Logic for Text Quiz (Check your specific variable name for the text quiz result)
+        // Assuming variable is something like data.acu_text_result based on context
+        if (data.acu_text_result?.quiz_time === "not_ended") {
+            textQuizRemaining = calculateTimeRemaining(
+                data.acu_text_result.start_time,
+                ACU_TEST_TEXT_TIMELIMIT_SECONDS,
+            );
+
+            // Refresh if timer just hit 0
+            if (textQuizRemaining === 0) {
+                handleTimerEnd();
+            }
+        }
+
+        // 2. Logic for Picture Quiz
+        // Assuming variable is something like data.acu_pic_result
+        if (data.acu_pic_result?.quiz_time === "not_ended") {
+            picQuizRemaining = calculateTimeRemaining(
+                data.acu_pic_result.start_time,
+                ACU_TEST_PIC_TIMELIMIT_SECONDS,
+            );
+
+            // Refresh if timer just hit 0
+            if (picQuizRemaining === 0) {
+                handleTimerEnd();
+            }
+        }
+    }
+
+    function handleTimerEnd() {
+        clearInterval(timerInterval);
+        // Reloads the page to fetch new results
+        location.reload();
+        // Alternatively use invalidateAll() for a smoother SvelteKit reload:
+        // invalidateAll();
+    }
 
     // --- State ---
     let first_name: string = "";
@@ -43,11 +112,13 @@
         const calculatedCorrect = data.no_no + data.yes_yes;
         const calculatedWrong = data.no_yes + data.yes_no;
         // Check if API returns unanswered, otherwise default to 0
-        const unanswered = 90 - calculatedCorrect - calculatedCorrect;
+        const unanswered = 90 - calculatedCorrect - calculatedWrong;
 
         const totalAttempts = calculatedCorrect + calculatedWrong;
         const accuracy =
-            totalAttempts > 0 ? (calculatedCorrect / totalAttempts) * 100 : 0;
+            totalAttempts > 0
+                ? ((calculatedCorrect - calculatedWrong * (1 / 3)) / 90) * 100
+                : 0;
 
         const totalActualNo = data.no_no + data.no_yes;
         const falsePositiveRate =
@@ -82,7 +153,9 @@
     function calculatePicStats(data: PicQuizResult) {
         const totalAttempts = data.correct + data.wrong;
         const accuracy =
-            totalAttempts > 0 ? (data.correct / totalAttempts) * 100 : 0;
+            totalAttempts > 0
+                ? ((data.correct - data.wrong * (1 / 3)) / 42) * 100
+                : 0;
         const unanswered = 42 - totalAttempts;
 
         return {
@@ -124,6 +197,8 @@
             const res2: any = await retreiveQuizAnswer({
                 quiz_type: "AcuTest_pic",
             });
+            data = { acu_text_result: res1, acu_pic_result: res2 };
+            console.log(data);
 
             if (res1 && res1.no_no !== undefined) {
                 textResult = res1;
@@ -143,6 +218,14 @@
     // Helper for circle SVG
     const radius = 35;
     const circumference = 2 * Math.PI * radius;
+    onMount(() => {
+        updateTimers(); // Run immediately
+        timerInterval = setInterval(updateTimers, 1000); // Run every second
+    });
+
+    onDestroy(() => {
+        if (timerInterval) clearInterval(timerInterval);
+    });
 </script>
 
 <svelte:head>
@@ -218,7 +301,40 @@
             <!-- CARD GRID -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- 1. Picture Test Card -->
-                {#if picResult && picStats}
+                {#if data.acu_pic_result?.quiz_time === "not_ended"}
+                    <div
+                        class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between"
+                    >
+                        <div
+                            class="flex flex-col items-center justify-center p-6 text-center"
+                        >
+                            <p class="text-lg font-bold text-gray-600 mb-2">
+                                نتایج آزمون شما درحال آماده شدن است
+                            </p>
+                            <div
+                                class="text-4xl font-mono font-bold text-primary"
+                            >
+                                {formatTime(picQuizRemaining)}
+                            </div>
+                            <p class="text-sm text-gray-400 mt-2">
+                                لطفا شکیبا باشید...
+                            </p>
+                        </div>
+                    </div>
+                {:else if picResult && picStats}
+                    {@const pTotal =
+                        Number(picStats.correctCount) +
+                        Number(picStats.wrongCount) +
+                        Number(picStats.unansweredCount)}
+                    {@const pCorrectLen =
+                        (Number(picStats.correctCount) / pTotal) *
+                        circumference}
+                    {@const pWrongLen =
+                        (Number(picStats.wrongCount) / pTotal) * circumference}
+                    {@const pUnansweredLen =
+                        (Number(picStats.unansweredCount) / pTotal) *
+                        circumference}
+
                     <div
                         class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between"
                     >
@@ -237,6 +353,7 @@
                                 class="relative flex items-center justify-center"
                             >
                                 <svg class="transform -rotate-90 w-24 h-24">
+                                    <!-- Background Circle (Just in case) -->
                                     <circle
                                         cx="48"
                                         cy="48"
@@ -245,26 +362,54 @@
                                         stroke-width="8"
                                         fill="transparent"
                                     />
+
+                                    <!-- 1. CORRECT SEGMENT (Green) -->
                                     <circle
                                         cx="48"
                                         cy="48"
                                         r={radius}
-                                        stroke={picStats.strokeColor}
+                                        stroke="#10b981"
                                         stroke-width="8"
                                         fill="transparent"
-                                        stroke-dasharray={circumference}
-                                        stroke-dashoffset={circumference -
-                                            (Number(picStats.accuracy) / 100) *
-                                                circumference}
+                                        stroke-dasharray="{pCorrectLen} {circumference}"
+                                        stroke-dashoffset="0"
+                                        class="transition-all duration-1000 ease-out"
+                                    />
+
+                                    <!-- 2. WRONG SEGMENT (Red) -->
+                                    <circle
+                                        cx="48"
+                                        cy="48"
+                                        r={radius}
+                                        stroke="#f43f5e"
+                                        stroke-width="8"
+                                        fill="transparent"
+                                        stroke-dasharray="{pWrongLen} {circumference}"
+                                        stroke-dashoffset={-pCorrectLen}
+                                        class="transition-all duration-1000 ease-out"
+                                    />
+
+                                    <!-- 3. UNANSWERED SEGMENT (Gray) -->
+                                    <circle
+                                        cx="48"
+                                        cy="48"
+                                        r={radius}
+                                        stroke="#cbd5e1"
+                                        stroke-width="8"
+                                        fill="transparent"
+                                        stroke-dasharray="{pUnansweredLen} {circumference}"
+                                        stroke-dashoffset={-(
+                                            pCorrectLen + pWrongLen
+                                        )}
                                         class="transition-all duration-1000 ease-out"
                                     />
                                 </svg>
+                                <!-- Percentage Text in Middle -->
                                 <span
                                     class="absolute text-lg font-black text-slate-700"
-                                    >{Math.round(
-                                        Number(picStats.accuracy),
-                                    )}%</span
                                 >
+                                    {Math.round(Number(picStats.accuracy))}%
+                                </span>
                             </div>
                         </div>
 
@@ -311,7 +456,40 @@
                 {/if}
 
                 <!-- 2. Text Test Card -->
-                {#if textResult && textStats}
+                {#if data.acu_text_result?.quiz_time === "not_ended"}
+                    <div
+                        class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between"
+                    >
+                        <div
+                            class="flex flex-col items-center justify-center p-6 text-center"
+                        >
+                            <p class="text-lg font-bold text-gray-600 mb-2">
+                                نتایج آزمون شما درحال آماده شدن است
+                            </p>
+                            <div
+                                class="text-4xl font-mono font-bold text-primary"
+                            >
+                                {formatTime(textQuizRemaining)}
+                            </div>
+                            <p class="text-sm text-gray-400 mt-2">
+                                لطفا شکیبا باشید...
+                            </p>
+                        </div>
+                    </div>
+                {:else if textResult && textStats}
+                    {@const tTotal =
+                        Number(textStats.correctCount) +
+                        Number(textStats.wrongCount) +
+                        Number(textStats.unansweredCount)}
+                    {@const tCorrectLen =
+                        (Number(textStats.correctCount) / tTotal) *
+                        circumference}
+                    {@const tWrongLen =
+                        (Number(textStats.wrongCount) / tTotal) * circumference}
+                    {@const tUnansweredLen =
+                        (Number(textStats.unansweredCount) / tTotal) *
+                        circumference}
+
                     <div
                         class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between"
                     >
@@ -330,6 +508,7 @@
                                 class="relative flex items-center justify-center"
                             >
                                 <svg class="transform -rotate-90 w-24 h-24">
+                                    <!-- Background Circle -->
                                     <circle
                                         cx="48"
                                         cy="48"
@@ -338,29 +517,55 @@
                                         stroke-width="8"
                                         fill="transparent"
                                     />
+
+                                    <!-- 1. CORRECT SEGMENT (Green) -->
                                     <circle
                                         cx="48"
                                         cy="48"
                                         r={radius}
-                                        stroke={textStats.strokeColor}
+                                        stroke="#10b981"
                                         stroke-width="8"
                                         fill="transparent"
-                                        stroke-dasharray={circumference}
-                                        stroke-dashoffset={circumference -
-                                            (Number(textStats.accuracy) / 100) *
-                                                circumference}
+                                        stroke-dasharray="{tCorrectLen} {circumference}"
+                                        stroke-dashoffset="0"
+                                        class="transition-all duration-1000 ease-out"
+                                    />
+
+                                    <!-- 2. WRONG SEGMENT (Red) -->
+                                    <circle
+                                        cx="48"
+                                        cy="48"
+                                        r={radius}
+                                        stroke="#f43f5e"
+                                        stroke-width="8"
+                                        fill="transparent"
+                                        stroke-dasharray="{tWrongLen} {circumference}"
+                                        stroke-dashoffset={-tCorrectLen}
+                                        class="transition-all duration-1000 ease-out"
+                                    />
+
+                                    <!-- 3. UNANSWERED SEGMENT (Gray) -->
+                                    <circle
+                                        cx="48"
+                                        cy="48"
+                                        r={radius}
+                                        stroke="#cbd5e1"
+                                        stroke-width="8"
+                                        fill="transparent"
+                                        stroke-dasharray="{tUnansweredLen} {circumference}"
+                                        stroke-dashoffset={-(
+                                            tCorrectLen + tWrongLen
+                                        )}
                                         class="transition-all duration-1000 ease-out"
                                     />
                                 </svg>
                                 <span
                                     class="absolute text-lg font-black text-slate-700"
-                                    >{Math.round(
-                                        Number(textStats.accuracy),
-                                    )}%</span
                                 >
+                                    {Math.round(Number(textStats.accuracy))}%
+                                </span>
                             </div>
                         </div>
-
                         <!-- 3-Column Stats -->
                         <div class="grid grid-cols-3 gap-2 mt-auto">
                             <div

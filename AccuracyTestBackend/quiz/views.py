@@ -12,7 +12,7 @@ from knox.auth import TokenAuthentication
 from . import conf
 
 from account.models import Account
-from .models import AcuTest_pic, AcuTest_text, ValuTest
+from .models import AcuTest_pic, AcuTest_text, Quiztime, ValuTest
 from .serializers import (
     AcuTestPicSerializer,
     AcuTestPicAnswerSerializer,
@@ -207,12 +207,13 @@ class QuizViewSet(viewsets.ViewSet):
         logger = logging.getLogger(__name__)
         quiz = self.get_quiz(quiz_type, request.user)
         logger.warning(quiz)
-        if (
-            quiz is None
-            or quiz.quiz_time.start_time is None
-            or self.quizHasEnded(quiz, quiz_type) is False
-        ):
+        if quiz is None or quiz.quiz_time.start_time is None:
             return JsonResponse({"quiz_time": "not_started"})
+        if self.quizHasEnded(quiz, quiz_type) is False:
+            return JsonResponse(
+                {"quiz_time": "not_ended", "start_time": quiz.quiz_time.start_time}
+            )
+
         match quiz_type:
             case "AcuTest_pic":
                 return JsonResponse(AcuTestPicAnswerSerializer(quiz).data)
