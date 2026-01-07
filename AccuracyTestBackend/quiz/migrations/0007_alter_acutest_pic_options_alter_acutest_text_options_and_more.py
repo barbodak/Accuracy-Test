@@ -6,50 +6,48 @@ import django.db.models.deletion
 
 
 def migrate_user_to_account(apps, schema_editor):
-    """Copy user_id - 1 to account_id for each model"""
     Acutest_pic = apps.get_model("quiz", "Acutest_pic")
     Acutest_text = apps.get_model("quiz", "Acutest_text")
     Valutest = apps.get_model("quiz", "Valutest")
 
-    for obj in Acutest_pic.objects.all():
+    for obj in Acutest_pic.objects.all().order_by("id"):
         if obj.user_id is not None:
             obj.account_id = obj.user_id - 1
         else:
-            obj.account_id = 4  # fallback default
+            obj.account_id = 4
         obj.save()
 
-    for obj in Acutest_text.objects.all():
+    for obj in Acutest_text.objects.all().order_by("id"):
         if obj.user_id is not None:
             obj.account_id = obj.user_id - 1
         else:
-            obj.account_id = 4  # fallback default
+            obj.account_id = 4
         obj.save()
 
-    for obj in Valutest.objects.all():
+    for obj in Valutest.objects.all().order_by("id"):
         if obj.user_id is not None:
             obj.account_id = obj.user_id - 1
         else:
-            obj.account_id = 4  # fallback default
+            obj.account_id = 4
         obj.save()
 
 
 def reverse_migrate(apps, schema_editor):
-    """Reverse: copy account_id + 1 back to user_id"""
     Acutest_pic = apps.get_model("quiz", "Acutest_pic")
     Acutest_text = apps.get_model("quiz", "Acutest_text")
     Valutest = apps.get_model("quiz", "Valutest")
 
-    for obj in Acutest_pic.objects.all():
+    for obj in Acutest_pic.objects.all().order_by("id"):
         if obj.account_id is not None:
             obj.user_id = obj.account_id + 1
         obj.save()
 
-    for obj in Acutest_text.objects.all():
+    for obj in Acutest_text.objects.all().order_by("id"):
         if obj.account_id is not None:
             obj.user_id = obj.account_id + 1
         obj.save()
 
-    for obj in Valutest.objects.all():
+    for obj in Valutest.objects.all().order_by("id"):
         if obj.account_id is not None:
             obj.user_id = obj.account_id + 1
         obj.save()
@@ -65,7 +63,100 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # 1. AlterModelOptions (these can stay at the top)
+        migrations.AddField(
+            model_name="acutest_pic",
+            name="account",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="acutest_pics",
+                to="account.account",
+            ),
+        ),
+        migrations.AddField(
+            model_name="acutest_text",
+            name="account",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="acutest_texts",
+                to="account.account",
+            ),
+        ),
+        migrations.AddField(
+            model_name="valutest",
+            name="account",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="valutests",
+                to="account.account",
+            ),
+        ),
+        migrations.RunPython(migrate_user_to_account, reverse_migrate),
+        migrations.RemoveField(
+            model_name="acutest_pic",
+            name="user",
+        ),
+        migrations.RemoveField(
+            model_name="acutest_text",
+            name="user",
+        ),
+        migrations.RemoveField(
+            model_name="valutest",
+            name="user",
+        ),
+        migrations.AlterField(
+            model_name="acutest_pic",
+            name="account",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="acutest_pics",
+                to="account.account",
+            ),
+        ),
+        migrations.AlterField(
+            model_name="acutest_text",
+            name="account",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="acutest_texts",
+                to="account.account",
+            ),
+        ),
+        migrations.AlterField(
+            model_name="valutest",
+            name="account",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="valutests",
+                to="account.account",
+            ),
+        ),
+        migrations.AddField(
+            model_name="acutest_pic",
+            name="created_at",
+            field=models.DateTimeField(
+                auto_now_add=True, default="2026-01-07T08:34:40.681Z"
+            ),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name="acutest_text",
+            name="created_at",
+            field=models.DateTimeField(
+                auto_now_add=True, default="2026-01-07T08:34:40.681Z"
+            ),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name="valutest",
+            name="created_at",
+            field=models.DateTimeField(
+                auto_now_add=True, default="2026-01-07T08:34:40.681Z"
+            ),
+            preserve_default=False,
+        ),
         migrations.AlterModelOptions(
             name="acutest_pic",
             options={
@@ -94,106 +185,6 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "Values Tests",
             },
         ),
-        # 2. ADD the account field first (nullable temporarily)
-        migrations.AddField(
-            model_name="acutest_pic",
-            name="account",
-            field=models.ForeignKey(
-                null=True,
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="acutest_pics",
-                to="account.account",
-            ),
-        ),
-        migrations.AddField(
-            model_name="acutest_text",
-            name="account",
-            field=models.ForeignKey(
-                null=True,
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="acutest_texts",
-                to="account.account",
-            ),
-        ),
-        migrations.AddField(
-            model_name="valutest",
-            name="account",
-            field=models.ForeignKey(
-                null=True,
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="valutests",
-                to="account.account",
-            ),
-        ),
-        # 3. RUN data migration (user still exists at this point!)
-        migrations.RunPython(migrate_user_to_account, reverse_migrate),
-        # 4. NOW remove the user field (data has been copied)
-        migrations.RemoveField(
-            model_name="acutest_pic",
-            name="user",
-        ),
-        migrations.RemoveField(
-            model_name="acutest_text",
-            name="user",
-        ),
-        migrations.RemoveField(
-            model_name="valutest",
-            name="user",
-        ),
-        # 5. Make account field non-nullable
-        migrations.AlterField(
-            model_name="acutest_pic",
-            name="account",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="acutest_pics",
-                to="account.account",
-            ),
-        ),
-        migrations.AlterField(
-            model_name="acutest_text",
-            name="account",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="acutest_texts",
-                to="account.account",
-            ),
-        ),
-        migrations.AlterField(
-            model_name="valutest",
-            name="account",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="valutests",
-                to="account.account",
-            ),
-        ),
-        # 6. Add created_at fields
-        migrations.AddField(
-            model_name="acutest_pic",
-            name="created_at",
-            field=models.DateTimeField(
-                auto_now_add=True, default="2026-01-07T08:34:40.681Z"
-            ),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name="acutest_text",
-            name="created_at",
-            field=models.DateTimeField(
-                auto_now_add=True, default="2026-01-07T08:34:40.681Z"
-            ),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name="valutest",
-            name="created_at",
-            field=models.DateTimeField(
-                auto_now_add=True, default="2026-01-07T08:34:40.681Z"
-            ),
-            preserve_default=False,
-        ),
-        # 7. AlterFields for other changes
         migrations.AlterField(
             model_name="acutest_pic",
             name="answers",
