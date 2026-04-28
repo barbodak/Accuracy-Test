@@ -99,7 +99,7 @@
                 <div
                     class="text-indigo-800 bg-indigo-100 font-mono text-lg font-semibold px-4 py-2 rounded-md"
                 >
-                    <span>{formatTime(minutes)}</span>:<span
+                    <span>{formatTime(minutes)}</span>::<span
                         >{formatTime(seconds)}</span
                     >
                 </div>
