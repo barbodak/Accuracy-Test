@@ -53,7 +53,7 @@
         try {
             await submitPromise; // Wait for the promise to resolve
             // Success! Redirect to the dashboard.
-            await goto("/AcuTest/Text/start"); // <-- Or wherever your main app is
+            await goto("/"); // <-- Or wherever your main app is
         } catch (e) {
             console.error("Failed to Signup:", e);
             error = "خطایی رخ داد. لطفا دوباره تلاش کنید.";

@@ -99,7 +99,7 @@
                 <div
                     class="text-indigo-800 bg-indigo-100 font-mono text-lg font-semibold px-4 py-2 rounded-md"
                 >
-                    <span>{formatTime(minutes)}</span>::<span
+                    <span>{formatTime(minutes)}</span>:<span
                         >{formatTime(seconds)}</span
                     >
                 </div>
@@ -146,7 +146,7 @@
                     class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200"
                     on:click={() => {
                         handleSubmit();
-                        goto("/AcuTest/result");
+                        goto("/");
                     }}
                 >
                     End Test
@@ -172,7 +172,7 @@
             <div class="flex justify-center gap-4">
                 <button
                     class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200"
-                    on:click={() => goto("/AcuTest/result")}
+                    on:click={() => goto("/")}
                 >
                     Start the second prt
                 </button>

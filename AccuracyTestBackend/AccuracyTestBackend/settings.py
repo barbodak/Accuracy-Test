@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "knox",
     "corsheaders",
     "account",
+    "chat_app",
 ]
 
 MIDDLEWARE = [
