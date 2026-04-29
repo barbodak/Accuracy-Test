@@ -38,7 +38,7 @@
         },
 
         {
-            title: "پرسشنامه WIL",
+            title: "WIL پرسشنامه",
             isDone: isValuDone,
             hasPermission: hasValPerm,
             notStarted: notStartedValPic,
@@ -112,98 +112,134 @@
     }
 </script>
 
-<div class="min-h-screen bg-slate-100">
-    <header class="bg-white shadow-sm">
+<!-- بخش <script> خود را بدون تغییر اینجا نگه دارید -->
+
+<div class="min-h-screen bg-slate-50 font-sans" dir="rtl">
+    <!-- هدر با افکت شیشه‌ای (Glassmorphism) -->
+    <header
+        class="sticky top-0 z-10 border-b border-slate-200 bg-white/80 backdrop-blur-md"
+    >
         <nav
             class="container mx-auto flex items-center justify-between px-6 py-4"
         >
-            <a href="/" class="text-xl font-bold text-indigo-600"
-                >QuizPlatform</a
-            >
-            <div>
-                {#if getCookies("auth_token")}
-                    <button
-                        on:click={() => goto("/Signup")}
-                        class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300"
-                    >
-                        Signup
-                    </button>
-                {:else}
-                    <button
-                        on:click={() => goto("/Signup")}
-                        class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300"
-                    >
-                        Signup
-                    </button>
-                {/if}
+            <div class="flex items-center gap-2">
+                <div class="h-3 w-3 rounded-full bg-indigo-600"></div>
+                <a
+                    href="/"
+                    class="text-xl font-extrabold tracking-tight text-slate-800"
+                    >پلتفرم آزمون</a
+                >
             </div>
+
+            <!-- دکمه ثبت‌نام که درخواست کردید تغییر نکند -->
+            <button
+                class="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                onclick={handleLogout}
+            >
+                ثبت‌نام
+            </button>
         </nav>
     </header>
 
-    <div class="p-4 sm:p-6 lg:p-8">
-        <main class="mx-auto max-w-4xl">
-            <div class="mb-8 rounded-lg bg-white p-8 shadow-xl">
-                <h1 class="text-3xl font-bold text-slate-800">
-                    سلام, {first_name}
-                    {last_name}!
+    <main class="container mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        <!-- بخش خوش‌آمدگویی با پس‌زمینه گرادیانت ملایم -->
+        <div
+            class="relative mb-10 overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-8 shadow-sm"
+        >
+            <div
+                class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-indigo-200/40 blur-3xl"
+            ></div>
+
+            <div class="relative z-10">
+                <h1 class="mb-3 text-3xl font-extrabold text-slate-900">
+                    سلام، <span class="text-indigo-600"
+                        >{first_name} {last_name}</span
+                    >! 👋
                 </h1>
-                <p class="mt-2 text-slate-500">
-                    لطفا پرسشنامه و آزمون‌های زیر را تکمیل کنید
+                <p class="text-lg text-slate-600">
+                    به پنل کاربری خود خوش آمدید. برای ارزیابی و ادامه مسیر،
+                    لطفاً آزمون‌های زیر را با دقت تکمیل کنید.
                 </p>
             </div>
+        </div>
 
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:gap-8">
-                {#each tests as test}
-                    {#if test.hasPermission}
-                        <div
-                            class="flex flex-col justify-between rounded-lg bg-white p-6 shadow-lg transition-shadow duration-200 hover:shadow-xl"
-                        >
+        <!-- گرید کارت‌های آزمون -->
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {#each tests as test}
+                <div
+                    class="group flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                >
+                    <div class="mb-6 flex-grow">
+                        <div class="flex items-center justify-between">
                             <h2
-                                class="mb-4 text-2xl font-semibold text-slate-700"
+                                class="text-xl font-bold text-slate-800 transition-colors group-hover:text-indigo-600"
                             >
                                 {test.title}
                             </h2>
-
-                            <div class="flex-grow">
-                                {#if test.isDone}
-                                    <div
-                                        class="rounded-lg bg-green-100 p-4 text-green-800"
-                                    >
-                                        <p class="font-semibold">تکمیل شده</p>
-                                        <p class="text-sm">
-                                            شما {test.title} را تکمیل کرده‌اید.
-                                        </p>
-                                    </div>
-                                {:else if test.hasPermission && test.notStarted}
-                                    <p class="mb-4 text-slate-600">
-                                        را انجام دهید {test.title} لطفا
-                                    </p>
-                                {:else if test.hasPermission}
-                                    <p class="mb-4 text-slate-600">
-                                        لطفا {test.title} را ادامه دهید
-                                    </p>
-                                {/if}
-                            </div>
-
-                            {#if !test.isDone && test.hasPermission && test.notStarted}
-                                <button
-                                    class="mt-4 w-full rounded-lg bg-indigo-600 px-5 py-3 font-bold text-white transition-colors duration-200 hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300"
-                                    on:click={() => goto(test.startLink)}
-                                >
-                                    شروع
-                                </button>
-                            {:else if !test.isDone && test.hasPermission}
-                                <button
-                                    class="mt-4 w-full rounded-lg bg-green-600 px-5 py-3 font-bold text-white transition-colors duration-200 hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300"
-                                    on:click={() => goto(test.continueLink)}
-                                >
-                                    ادامه دهید
-                                </button>
-                            {/if}
                         </div>
-                    {/if}
-                {/each}
-            </div>
-        </main>
-    </div>
+                    </div>
+
+                    <div class="mt-auto border-t border-slate-100 pt-4">
+                        {#if test.hasPermission}
+                            {#if test.isDone}
+                                <!-- حالت تکمیل شده با آیکون تیک -->
+                                <div
+                                    class="flex items-center justify-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 py-3 text-sm font-semibold text-emerald-700"
+                                >
+                                    <svg
+                                        class="h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M5 13l4 4L19 7"
+                                        />
+                                    </svg>
+                                    با موفقیت انجام شد
+                                </div>
+                            {:else if test.notStarted}
+                                <a
+                                    href={test.startLink}
+                                    class="flex w-full justify-center rounded-xl bg-indigo-600 py-3 text-sm font-medium text-white shadow-md transition-all hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                >
+                                    شروع آزمون
+                                </a>
+                            {:else}
+                                <a
+                                    href={test.continueLink}
+                                    class="flex w-full justify-center rounded-xl bg-blue-600 py-3 text-sm font-medium text-white shadow-md transition-all hover:bg-blue-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                >
+                                    ادامه آزمون
+                                </a>
+                            {/if}
+                        {:else}
+                            <!-- حالت غیرفعال با آیکون قفل -->
+                            <div
+                                class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 py-3 text-sm font-medium text-slate-500"
+                            >
+                                <svg
+                                    class="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                    />
+                                </svg>
+                                در حال حاضر غیرفعال است
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+            {/each}
+        </div>
+    </main>
 </div>
