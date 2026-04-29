@@ -115,7 +115,7 @@
 <!-- بخش <script> خود را بدون تغییر اینجا نگه دارید -->
 
 <div class="min-h-screen bg-slate-50 font-sans" dir="rtl">
-    <!-- هدر با افکت شیشه‌ای (Glassmorphism) -->
+    <!-- هدر با افکت شیشه‌ای -->
     <header
         class="sticky top-0 z-10 border-b border-slate-200 bg-white/80 backdrop-blur-md"
     >
@@ -131,7 +131,6 @@
                 >
             </div>
 
-            <!-- دکمه ثبت‌نام که درخواست کردید تغییر نکند -->
             <button
                 class="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 onclick={handleLogout}
@@ -142,7 +141,7 @@
     </header>
 
     <main class="container mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <!-- بخش خوش‌آمدگویی با پس‌زمینه گرادیانت ملایم -->
+        <!-- بخش خوش‌آمدگویی -->
         <div
             class="relative mb-10 overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-8 shadow-sm"
         >
@@ -166,21 +165,22 @@
         <!-- گرید کارت‌های آزمون -->
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {#each tests as test}
-                <div
-                    class="group flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                >
-                    <div class="mb-6 flex-grow">
-                        <div class="flex items-center justify-between">
-                            <h2
-                                class="text-xl font-bold text-slate-800 transition-colors group-hover:text-indigo-600"
-                            >
-                                {test.title}
-                            </h2>
+                <!-- شرط دسترسی اینجا قرار گرفت: کل کارت فقط در صورت داشتن دسترسی نمایش داده می‌شود -->
+                {#if test.hasPermission}
+                    <div
+                        class="group flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                    >
+                        <div class="mb-6 flex-grow">
+                            <div class="flex items-center justify-between">
+                                <h2
+                                    class="text-xl font-bold text-slate-800 transition-colors group-hover:text-indigo-600"
+                                >
+                                    {test.title}
+                                </h2>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="mt-auto border-t border-slate-100 pt-4">
-                        {#if test.hasPermission}
+                        <div class="mt-auto border-t border-slate-100 pt-4">
                             {#if test.isDone}
                                 <!-- حالت تکمیل شده با آیکون تیک -->
                                 <div
@@ -216,29 +216,9 @@
                                     ادامه آزمون
                                 </a>
                             {/if}
-                        {:else}
-                            <!-- حالت غیرفعال با آیکون قفل -->
-                            <div
-                                class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 py-3 text-sm font-medium text-slate-500"
-                            >
-                                <svg
-                                    class="h-5 w-5"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                    />
-                                </svg>
-                                در حال حاضر غیرفعال است
-                            </div>
-                        {/if}
+                        </div>
                     </div>
-                </div>
+                {/if}
             {/each}
         </div>
     </main>
