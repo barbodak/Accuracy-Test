@@ -20,7 +20,7 @@
     let last_name = "";
     $: tests = [
         {
-            title: "AcuTextTest",
+            title: "تست دقت",
             isDone: isAcuTextDone,
             hasPermission: hasAcuPerm,
             notStarted: notStartedAcuText,
@@ -29,7 +29,7 @@
         },
 
         {
-            title: "AcuPicTest",
+            title: "تست دقت - بخش دوم",
             isDone: isAcuPicDone,
             hasPermission: hasAcuPerm && isAcuTextDone,
             notStarted: notStartedAcuPic,
@@ -38,7 +38,7 @@
         },
 
         {
-            title: "ValuTest",
+            title: "پرسشنامه WIL",
             isDone: isValuDone,
             hasPermission: hasValPerm,
             notStarted: notStartedValPic,
@@ -144,12 +144,11 @@
         <main class="mx-auto max-w-4xl">
             <div class="mb-8 rounded-lg bg-white p-8 shadow-xl">
                 <h1 class="text-3xl font-bold text-slate-800">
-                    Welcome, {first_name}
-                    {last_name}
+                    سلام, {first_name}
+                    {last_name}!
                 </h1>
                 <p class="mt-2 text-slate-500">
-                    Here are your available assessments. Please complete them as
-                    required.
+                    لطفا پرسشنامه و آزمون‌های زیر را تکمیل کنید
                 </p>
             </div>
 
@@ -170,19 +169,18 @@
                                     <div
                                         class="rounded-lg bg-green-100 p-4 text-green-800"
                                     >
-                                        <p class="font-semibold">Completed</p>
+                                        <p class="font-semibold">تکمیل شده</p>
                                         <p class="text-sm">
-                                            You have already taken the {test.title}.
+                                            شما {test.title} را تکمیل کرده‌اید.
                                         </p>
                                     </div>
                                 {:else if test.hasPermission && test.notStarted}
                                     <p class="mb-4 text-slate-600">
-                                        You are cleared to start this test.
-                                        Please begin when you are ready.
+                                        را انجام دهید {test.title} لطفا
                                     </p>
                                 {:else if test.hasPermission}
                                     <p class="mb-4 text-slate-600">
-                                        Continue your quiz.
+                                        لطفا {test.title} را ادامه دهید
                                     </p>
                                 {/if}
                             </div>
@@ -192,14 +190,14 @@
                                     class="mt-4 w-full rounded-lg bg-indigo-600 px-5 py-3 font-bold text-white transition-colors duration-200 hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300"
                                     on:click={() => goto(test.startLink)}
                                 >
-                                    Start
+                                    شروع
                                 </button>
                             {:else if !test.isDone && test.hasPermission}
                                 <button
                                     class="mt-4 w-full rounded-lg bg-green-600 px-5 py-3 font-bold text-white transition-colors duration-200 hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300"
                                     on:click={() => goto(test.continueLink)}
                                 >
-                                    Continue
+                                    ادامه دهید
                                 </button>
                             {/if}
                         </div>
