@@ -11,14 +11,18 @@ from knox.views import LoginView as KnoxLoginView
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from knox.settings import knox_settings
+from .serializers import CustomAuthTokenSerializer  # Import your new serializer
+
 
 class LoginView(KnoxLoginView):
     permission_classes = (permissions.AllowAny,)
+
     def post(self, request, format=None):
-        serializer = AuthTokenSerializer(data=request.data)
+        # serializer = AuthTokenSerializer(data=request.data)
+        serializer = CustomAuthTokenSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
+        user = serializer.validated_data["user"]
         login(request, user)
         return super(LoginView, self).post(request, format=None)
-
-

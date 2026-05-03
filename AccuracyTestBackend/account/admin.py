@@ -5,8 +5,14 @@ from django.utils.html import format_html
 import random
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.shortcuts import render
+from django.contrib.admin.utils import get_deleted_objects
+from django.template.response import TemplateResponse
+from django.contrib.auth import get_user_model
 
 from .models import Account, Organization
+
+User = get_user_model()
 
 
 class AccountInline(admin.StackedInline):
@@ -224,16 +230,42 @@ class AccountAdmin(admin.ModelAdmin):
         )
         self.message_user(request, f"{updated} account(s) had permissions revoked.")
 
-    @admin.action(description="Delete associated User(s) (also deletes Account)")
+    @admin.action(description="Delete associated User")
     def delete_associated_users(self, request, queryset):
+        # Get the users that are going to be deleted
         user_ids = queryset.values_list("user_id", flat=True)
+        users_to_delete = User.objects.filter(id__in=user_ids)
 
-        deleted_count, _ = User.objects.filter(id__in=user_ids).delete()
+        # 1. If confirmed, perform the deletion
+        if request.POST.get("post"):
+            deleted_count, _ = users_to_delete.delete()
+            self.message_user(
+                request,
+                f"Successfully deleted {deleted_count} user(s) and their associated accounts.",
+                level=messages.SUCCESS,
+            )
+            return None
 
-        self.message_user(
-            request,
-            f"Successfully deleted {deleted_count} user(s) and their associated accounts.",
-            level=messages.SUCCESS,
+        # 2. If NOT confirmed, gather all objects that will be cascade-deleted
+        # get_deleted_objects traces all related CASCADE relationships
+        deletable_objects, model_count, perms_needed, protected = get_deleted_objects(
+            users_to_delete, request, self.admin_site
+        )
+
+        # 3. Render the confirmation page with the cascade data
+        context = {
+            **self.admin_site.each_context(request),
+            "title": "Are you sure you want to delete these users and all related data?",
+            "deletable_objects": deletable_objects,
+            "model_count": dict(model_count).items(),
+            "queryset": queryset,
+            "opts": self.model._meta,
+            "action_checkbox_name": admin.helpers.ACTION_CHECKBOX_NAME,
+            "action_name": "delete_associated_users",
+        }
+
+        return TemplateResponse(
+            request, "admin/custom_delete_confirmation.html", context
         )
 
     @admin.action(description="Reset password to an easy 6-digit code")
