@@ -38,7 +38,7 @@ class Account(models.Model):
     sex = models.CharField(max_length=1, choices=SEX_CHOICES, null=True, blank=True)
     first_name = models.CharField(max_length=255, blank=True)
     last_name = models.CharField(max_length=255, blank=True)
-    email = models.EmailField(blank=True)
+    email = models.EmailField(unique=True, blank=True, null=True)
     phone = models.CharField(blank=True, null=True, max_length=255)
     university = models.CharField(max_length=255, blank=True)
     major = models.CharField(max_length=255, blank=True)
@@ -57,6 +57,8 @@ class Account(models.Model):
     # quiz permissions
     acuTest_permission = models.BooleanField(editable=True, default=False)
     valuTest_permission = models.BooleanField(editable=True, default=False)
+    belbinTest_permission = models.BooleanField(editable=True, default=False)
+    hexacoTest_permission = models.BooleanField(editable=True, default=False)
 
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name}"

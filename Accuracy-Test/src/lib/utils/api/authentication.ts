@@ -22,11 +22,12 @@ export const login = async (data: object) => {
 
         console.log(account.first_name);
 
-        if (account.is_final === false) {
-            goto('/Login/Finalize');
-        } else {
-            goto('/');
-        }
+        goto('/');
+        // if (account.is_final === false) {
+        //     goto('/Login/Finalize');
+        // } else {
+        //     goto('/');
+        // }
     } catch (e) {
         console.error("Login failed:", e);
     }

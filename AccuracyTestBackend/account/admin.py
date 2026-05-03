@@ -2,6 +2,9 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from django.utils.html import format_html
+import random
+from django.contrib.auth.models import User
+from django.contrib import messages
 
 from .models import Account, Organization
 
@@ -19,7 +22,12 @@ class AccountInline(admin.StackedInline):
         ("email", "phone"),
         ("university", "major", "degree"),
         "organization",
-        ("acuTest_permission", "valutest_permission"),
+        (
+            "acuTest_permission",
+            "valutest_permission",
+            "belbinTest_permission",
+            "hexacoTest_permission",
+        ),
         "is_final",
     )
 
@@ -79,13 +87,14 @@ class AccountAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "full_name",
-        "user",
-        "age",
         "sex",
         "organization",
         "degree",
         "quiz_permissions",
         "is_final",
+        "email",
+        "user",
+        "age",
     )
     list_display_links = ("id", "full_name")
     list_filter = (
@@ -94,6 +103,8 @@ class AccountAdmin(admin.ModelAdmin):
         "organization",
         "acuTest_permission",
         "valuTest_permission",
+        "belbinTest_permission",
+        "hexacoTest_permission",
         "is_final",
     )
     search_fields = (
@@ -135,7 +146,12 @@ class AccountAdmin(admin.ModelAdmin):
             "Permissions & Status",
             {
                 "fields": (
-                    ("acuTest_permission", "valuTest_permission"),
+                    (
+                        "acuTest_permission",
+                        "valuTest_permission",
+                        "belbinTest_permission",
+                        "hexacoTest_permission",
+                    ),
                     "is_final",
                 ),
                 "classes": ("collapse",),
@@ -156,6 +172,10 @@ class AccountAdmin(admin.ModelAdmin):
             perms.append("🖼️ Acu")
         if obj.valuTest_permission:
             perms.append("📝 Val")
+        if obj.belbinTest_permission:
+            perms.append("🎱 bel")
+        if obj.hexacoTest_permission:
+            perms.append("🔮 hex")
         return " | ".join(perms) if perms else "❌ None"
 
     quiz_permissions.short_description = "Quiz Permissions"
@@ -163,7 +183,11 @@ class AccountAdmin(admin.ModelAdmin):
     actions = [
         "grant_acuTest_permission",
         "grant_valuTest_permission",
+        "grant_belbinTest_permission",
+        "grant_hexacoTest_permission",
         "revoke_all_permissions",
+        "delete_associated_users",
+        "reset_account_password",
     ]
 
     @admin.action(description="Grant AcuTest permission")
@@ -171,12 +195,58 @@ class AccountAdmin(admin.ModelAdmin):
         updated = queryset.update(acuTest_permission=True)
         self.message_user(request, f"{updated} account(s) granted AcuTest permission.")
 
-    @admin.action(description="Grant ValuTest permission")
+    @admin.action(description="Grant WIL permission")
     def grant_valuTest_permission(self, request, queryset):
         updated = queryset.update(valuTest_permission=True)
-        self.message_user(request, f"{updated} account(s) granted ValuTest permission.")
+        self.message_user(request, f"{updated} account(s) granted WIL permission.")
+
+    @admin.action(description="Grant BelbinTest permission")
+    def grant_belbinTest_permission(self, request, queryset):
+        updated = queryset.update(belbinTest_permission=True)
+        self.message_user(
+            request, f"{updated} account(s) granted BelbinTest permission."
+        )
+
+    @admin.action(description="Grant HexacoTest permission")
+    def grant_hexacoTest_permission(self, request, queryset):
+        updated = queryset.update(hexacoTest_permission=True)
+        self.message_user(
+            request, f"{updated} account(s) granted HexacoTest permission."
+        )
 
     @admin.action(description="Revoke all quiz permissions")
     def revoke_all_permissions(self, request, queryset):
-        updated = queryset.update(acuTest_permission=False, valutest_permission=False)
+        updated = queryset.update(
+            acuTest_permission=False,
+            valuTest_permission=False,
+            belbinTest_permission=False,
+            hexacoTest_permission=False,
+        )
         self.message_user(request, f"{updated} account(s) had permissions revoked.")
+
+    @admin.action(description="Delete associated User(s) (also deletes Account)")
+    def delete_associated_users(self, request, queryset):
+        user_ids = queryset.values_list("user_id", flat=True)
+
+        deleted_count, _ = User.objects.filter(id__in=user_ids).delete()
+
+        self.message_user(
+            request,
+            f"Successfully deleted {deleted_count} user(s) and their associated accounts.",
+            level=messages.SUCCESS,
+        )
+
+    @admin.action(description="Reset password to an easy 6-digit code")
+    def reset_account_password(self, request, queryset):
+        for account in queryset:
+            user = account.user
+            new_password = str(random.randint(100000, 999999))
+
+            user.set_password(new_password)
+            user.save()
+
+            self.message_user(
+                request,
+                f"Password for {user.username} ({account.first_name} {account.last_name}) reset to: {new_password}",
+                level=messages.SUCCESS,
+            )

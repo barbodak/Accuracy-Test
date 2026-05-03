@@ -29,24 +29,24 @@
         <h1
             class="mb-6 text-center text-2xl font-bold text-slate-800 sm:text-3xl"
         >
-            Log In
+            ورود
         </h1>
 
         <form class="space-y-6" on:submit|preventDefault={handleLogin}>
             <div>
                 <label
-                    for="username"
+                    for="email"
                     class="mb-1 block text-sm font-medium text-slate-700"
                 >
-                    Username
+                    ایمیل
                 </label>
                 <input
                     type="text"
-                    name="username"
-                    id="username"
+                    name="email"
+                    id="email"
                     bind:value={data.username}
                     class="block w-full rounded-md border-slate-300 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-base"
-                    placeholder="your_username"
+                    placeholder="your_email@gmail.com"
                     required
                 />
             </div>
@@ -56,7 +56,7 @@
                     for="password"
                     class="mb-1 block text-sm font-medium text-slate-700"
                 >
-                    Password
+                    پسورد
                 </label>
                 <input
                     type="password"

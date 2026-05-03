@@ -36,6 +36,8 @@ class AccountSerializer(serializers.ModelSerializer):
             "is_final",
             "acuTest_permission",
             "valuTest_permission",
+            "belbinTest_permission",
+            "hexacoTest_permission",
         ]
 
         # We mark 'is_final' as read-only because views.py sets it manually
@@ -45,6 +47,8 @@ class AccountSerializer(serializers.ModelSerializer):
             "is_final",
             "acuTest_permission",
             "valuTest_permission",
+            "belbinTest_permission",
+            "hexacoTest_permission",
         ]
 
         # Mark the writeable fields as 'required' for the finalize step
@@ -62,7 +66,7 @@ class SignupSerializer(serializers.Serializer):
 
     first_name = serializers.CharField(required=True, max_length=255, allow_blank=False)
     last_name = serializers.CharField(required=True, max_length=255, allow_blank=False)
-    email = serializers.EmailField(required=False, allow_blank=True)
+    email = serializers.EmailField(required=True)
     age = serializers.IntegerField(required=False, allow_null=True)
     sex = serializers.ChoiceField(
         choices=Account.SEX_CHOICES, required=False, allow_null=True
@@ -73,6 +77,11 @@ class SignupSerializer(serializers.Serializer):
     degree = serializers.ChoiceField(
         choices=Account.DEGREE_CHOICES, required=False, allow_null=True
     )
+
+    def validate_email(self, value):
+        if Account.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A user with that email already exists.")
+        return value
 
     def generate_unique_username(self, existing_usernames, length=8):
         """

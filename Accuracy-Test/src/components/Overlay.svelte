@@ -6,7 +6,7 @@
 <div
     on:click
     role="button"
-    class={"w-screen h-screen fixed top-0 left-0 flex justify-center items-center " +
+    class={"w-screen h-screen fixed top-0 left-0 flex justify-center items-center z-50 " +
         (isTransparent ? "bg-black bg-opacity-60" : "")}
 >
     <div class="relative flex flex-col justify-center items-center max-w-lg">
