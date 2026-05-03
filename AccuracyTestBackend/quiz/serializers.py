@@ -1,6 +1,13 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User, Group
-from .models import AcuTest_pic, AcuTest_text, Quiztime, ValuTest
+from .models import (
+    AcuTest_pic,
+    AcuTest_text,
+    Quiztime,
+    ValuTest,
+    BelbinTest,
+    HexacoTest,
+)
 
 
 class AcuTestPicSerializer(serializers.ModelSerializer):
@@ -62,3 +69,19 @@ class ValuTestAnswerSerializer(serializers.ModelSerializer):
             "tofigh",
             "quiz_time",
         ]
+
+
+class BelbinTestSerializer(serializers.ModelSerializer):
+    quiz_time = serializers.SlugRelatedField(read_only=True, slug_field="start_time")
+
+    class Meta:
+        model = BelbinTest
+        fields = ["answers", "quiz_time"]
+
+
+class HexacoTestSerializer(serializers.ModelSerializer):
+    quiz_time = serializers.SlugRelatedField(read_only=True, slug_field="start_time")
+
+    class Meta:
+        model = HexacoTest
+        fields = ["answers", "quiz_time"]

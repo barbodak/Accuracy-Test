@@ -38,7 +38,7 @@ class Account(models.Model):
     sex = models.CharField(max_length=1, choices=SEX_CHOICES, null=True, blank=True)
     first_name = models.CharField(max_length=255, blank=True)
     last_name = models.CharField(max_length=255, blank=True)
-    email = models.EmailField(unique=True, blank=True, null=True)
+    email = models.EmailField(unique=True)
     phone = models.CharField(blank=True, null=True, max_length=255)
     university = models.CharField(max_length=255, blank=True)
     major = models.CharField(max_length=255, blank=True)

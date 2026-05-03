@@ -2,7 +2,16 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from .models import Account
-from quiz.models import AcuTest_pic, AcuTest_text, Quiztime, ValuTest
+from quiz.models import (
+    AcuTest_pic,
+    AcuTest_text,
+    Quiztime,
+    ValuTest,
+    BelbinTest,
+    HexacoTest,
+)
+
+import logging
 
 
 @receiver(post_save, sender=Account)
@@ -11,6 +20,16 @@ def create_related_quizzes(sender, instance, created, **kwargs):
     This function is called right after an Account object is saved.
     The 'created' flag is True only the very first time it's created.
     """
+    logger = logging.getLogger(__name__)
+    logger.warning(instance)
+
+    if not BelbinTest.objects.filter(account=instance).exists():
+        q1 = Quiztime.objects.create()
+        BelbinTest.objects.create(account=instance, quiz_time=q1, answers=[0] * 56)
+
+    if not HexacoTest.objects.filter(account=instance).exists():
+        q1 = Quiztime.objects.create()
+        HexacoTest.objects.create(account=instance, quiz_time=q1, answers=[0] * 100)
     if created:
         # This code will now only run ONCE when a new Account is made.
         if not ValuTest.objects.filter(account=instance).exists():

@@ -11,11 +11,17 @@
     let isAcuTextDone = false;
     let isAcuPicDone = false;
     let isValuDone = false;
+    let isHexacoDone = false;
+    let isBelbinDone = false;
     let hasValPerm = false;
     let hasAcuPerm = false;
+    let hasBelbinPerm = false;
+    let hasHexacoPerm = false;
     let notStartedAcuText = false;
     let notStartedAcuPic = false;
-    let notStartedValPic = false;
+    let notStartedVal = false;
+    let notStartedBelbin = false;
+    let notStartedHexaco = false;
     let first_name = "";
     let last_name = "";
     $: tests = [
@@ -38,12 +44,28 @@
         },
 
         {
-            title: "WIL پرسشنامه",
+            title: "پرسشنامه WIL",
             isDone: isValuDone,
             hasPermission: hasValPerm,
-            notStarted: notStartedValPic,
+            notStarted: notStartedVal,
             startLink: "/ValuTest/start",
             continueLink: "/ValuTest",
+        },
+        {
+            title: "تست Belbin",
+            isDone: isBelbinDone,
+            hasPermission: hasBelbinPerm,
+            notStarted: notStartedBelbin,
+            startLink: "/BelbinTest/start",
+            continueLink: "/BelbinTest",
+        },
+        {
+            title: "تست Hexaco",
+            isDone: isHexacoDone,
+            hasPermission: hasHexacoPerm,
+            notStarted: notStartedHexaco,
+            startLink: "/HexacoTest/start",
+            continueLink: "/HexacoTest",
         },
     ];
     onMount(async () => {
@@ -61,21 +83,42 @@
                 // By re-assigning these variables, we trigger the reactive 'tests' array to update.
                 hasValPerm = account.valuTest_permission;
                 hasAcuPerm = account.acuTest_permission;
+                hasBelbinPerm = account.belbinTest_permission;
+                hasHexacoPerm = account.hexacoTest_permission;
                 first_name = account.first_name;
                 last_name = account.last_name;
             }
 
             const valutest = await retreiveQuiz({ quiz_type: "ValuTest" });
-            const valuans = await retreiveQuizAnswer({ quiz_type: "ValuTest" });
-            console.log(valuans.tofigh);
             if (valutest?.quiz_time) {
-                if (valutest?.quiz_time == "not_started")
-                    notStartedValPic = true;
+                if (valutest?.quiz_time == "not_started") notStartedVal = true;
 
                 const now = new Date();
                 const qdate = new Date(valutest.quiz_time);
                 const delta = now.valueOf() - qdate.valueOf();
-                if (Math.floor(delta / 1000) >= 10 * 60) isValuDone = true;
+                if (Math.floor(delta / 1000) >= 1 * 60) isValuDone = true;
+            }
+
+            const belbintest = await retreiveQuiz({ quiz_type: "BelbinTest" });
+            if (belbintest?.quiz_time) {
+                if (belbintest?.quiz_time == "not_started")
+                    notStartedBelbin = true;
+
+                const now = new Date();
+                const qdate = new Date(belbintest.quiz_time);
+                const delta = now.valueOf() - qdate.valueOf();
+                if (Math.floor(delta / 1000) >= 1 * 60) isBelbinDone = true;
+            }
+
+            const hexacotest = await retreiveQuiz({ quiz_type: "HexacoTest" });
+            if (hexacotest?.quiz_time) {
+                if (hexacotest?.quiz_time == "not_started")
+                    notStartedHexaco = true;
+
+                const now = new Date();
+                const qdate = new Date(hexacotest.quiz_time);
+                const delta = now.valueOf() - qdate.valueOf();
+                if (Math.floor(delta / 1000) >= 1 * 60) isHexacoDone = true;
             }
 
             const acutest_text = await retreiveQuiz({
@@ -204,7 +247,7 @@
                             {:else if test.notStarted}
                                 <a
                                     href={test.startLink}
-                                    class="flex w-full justify-center rounded-xl bg-indigo-600 py-3 text-sm font-medium text-white shadow-md transition-all hover:bg-indigo-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                    class="flex w-full justify-center rounded-xl bg-green-600 py-3 text-sm font-medium text-white shadow-md transition-all hover:bg-green-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                                 >
                                     شروع آزمون
                                 </a>

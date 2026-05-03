@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+import account
 from account.models import Account
 
 
@@ -114,6 +115,63 @@ class ValuTest(models.Model):
     class Meta:
         verbose_name = "Values Test"
         verbose_name_plural = "Values Tests"
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        start = self.quiz_time.start_time if self.quiz_time else "N/A"
+        return f"{self.account} | {start}"
+
+
+class BelbinTest(models.Model):
+    account = models.ForeignKey(
+        Account, on_delete=models.CASCADE, related_name="belbintest"
+    )
+    answers = ArrayField(models.IntegerField(), size=56)
+    quiz_time = models.OneToOneField(
+        Quiztime,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="belbintest",
+    )
+
+    cf = models.IntegerField(default=0)
+    tw = models.IntegerField(default=0)
+    imp = models.IntegerField(default=0)
+    me = models.IntegerField(default=0)
+    ri = models.IntegerField(default=0)
+    pl = models.IntegerField(default=0)
+    co = models.IntegerField(default=0)
+    sh = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)  # Good to track
+
+    class Meta:
+        verbose_name = "Belbin Test"
+        verbose_name_plural = "Belbin Tests"
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        start = self.quiz_time.start_time if self.quiz_time else "N/A"
+        return f"{self.account} | {start}"
+
+
+class HexacoTest(models.Model):
+    account = models.ForeignKey(
+        Account, on_delete=models.CASCADE, related_name="hexacotest"
+    )
+    answers = ArrayField(models.IntegerField(), size=100)
+    quiz_time = models.OneToOneField(
+        Quiztime,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="hexacotest",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)  # Good to track
+
+    class Meta:
+        verbose_name = "Hexaco Test"
+        verbose_name_plural = "Hexaco Tests"
         ordering = ["-created_at"]
 
     def __str__(self) -> str:

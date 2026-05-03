@@ -9,10 +9,19 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 
+import account
+
 from . import conf
 
 from account.models import Account
-from .models import AcuTest_pic, AcuTest_text, Quiztime, ValuTest
+from .models import (
+    AcuTest_pic,
+    AcuTest_text,
+    Quiztime,
+    ValuTest,
+    BelbinTest,
+    HexacoTest,
+)
 from .serializers import (
     AcuTestPicSerializer,
     AcuTestPicAnswerSerializer,
@@ -20,6 +29,8 @@ from .serializers import (
     AcuTestTextAnswerSerializer,
     ValuTestSerializer,
     ValuTestAnswerSerializer,
+    BelbinTestSerializer,
+    HexacoTestSerializer,
 )
 import logging
 
@@ -28,7 +39,9 @@ class QuizViewSet(viewsets.ViewSet):
     authentication_classes = (TokenAuthentication,)
     ermission_classes = (IsAuthenticated,)
 
-    def get_quiz(self, quiz_type, user) -> AcuTest_pic | AcuTest_text | ValuTest | None:
+    def get_quiz(
+        self, quiz_type, user
+    ) -> AcuTest_pic | AcuTest_text | ValuTest | BelbinTest | HexacoTest | None:
         acc = Account.objects.get(user=user)
         logger = logging.getLogger(__name__)
         logger.warning(acc)
@@ -45,6 +58,14 @@ class QuizViewSet(viewsets.ViewSet):
                 if acc.valuTest_permission is False:
                     return None
                 quiz = ValuTest.objects.get(account=acc)
+            case "BelbinTest":
+                if acc.belbinTest_permission is False:
+                    return None
+                quiz = BelbinTest.objects.get(account=acc)
+            case "HexacoTest":
+                if acc.hexacoTest_permission is False:
+                    return None
+                quiz = HexacoTest.objects.get(account=acc)
             case _:  # Default case for unmatched quiz_type
                 raise ValueError(f"Unrecognized quiz type: {quiz_type}")
         logger.warning(quiz)
@@ -55,18 +76,38 @@ class QuizViewSet(viewsets.ViewSet):
         match quiz_type:
             case "AcuTest_pic":
                 if (
-                    timezone.now() - quiz.quiz_time.start_time
-                ).seconds > conf.ACU_TEST_PIC_TIMELIMIT_SECONDS:
+                    (timezone.now() - quiz.quiz_time.start_time).seconds
+                    > conf.ACU_TEST_PIC_TIMELIMIT_SECONDS
+                    or quiz.quiz_time.finish_time is not None
+                ):
                     return True
             case "AcuTest_text":
                 if (
-                    timezone.now() - quiz.quiz_time.start_time
-                ).seconds > conf.ACU_TEST_TEXT_TIMELIMIT_SECONDS:
+                    (timezone.now() - quiz.quiz_time.start_time).seconds
+                    > conf.ACU_TEST_TEXT_TIMELIMIT_SECONDS
+                    or quiz.quiz_time.finish_time is not None
+                ):
                     return True
             case "ValuTest":
                 if (
                     (timezone.now() - quiz.quiz_time.start_time).seconds
                     > conf.VALU_TEST_TIMELIMIT_SECONDS
+                    or quiz.quiz_time.finish_time is not None
+                ):
+                    logger.warning("ITS FINISHED")
+                    return True
+            case "BelbinTest":
+                if (
+                    (timezone.now() - quiz.quiz_time.start_time).seconds
+                    > conf.BELBIN_TIMELIMIT_SECONDS
+                    or quiz.quiz_time.finish_time is not None
+                ):
+                    logger.warning("ITS FINISHED")
+                    return True
+            case "HexacoTest":
+                if (
+                    (timezone.now() - quiz.quiz_time.start_time).seconds
+                    > conf.HEXACO_TIMELIMIT_SECONDS
                     or quiz.quiz_time.finish_time is not None
                 ):
                     logger.warning("ITS FINISHED")
@@ -143,6 +184,88 @@ class QuizViewSet(viewsets.ViewSet):
                     quiz.no_no += 1
         quiz.save()
 
+    def calculateBelbinTestResult(self, quiz: BelbinTest):
+        logger = logging.getLogger(__name__)
+        logger.warning("enterd_3")
+        user_answers = quiz.answers
+        quiz.sh = (
+            user_answers[2]
+            + user_answers[8 + 0]
+            + user_answers[8 * 2 + 6]
+            + user_answers[8 * 3 + 1]
+            + user_answers[8 * 4 + 5]
+            + user_answers[8 * 5 + 5]
+            + user_answers[8 * 6 + 4]
+        )
+        quiz.co = (
+            user_answers[6]
+            + user_answers[8 + 5]
+            + user_answers[8 * 2 + 3]
+            + user_answers[8 * 3 + 2]
+            + user_answers[8 * 4 + 4]
+            + user_answers[8 * 5 + 3]
+            + user_answers[8 * 6 + 6]
+        )
+        quiz.pl = (
+            user_answers[3]
+            + user_answers[8 + 4]
+            + user_answers[8 * 2 + 5]
+            + user_answers[8 * 3 + 5]
+            + user_answers[8 * 4 + 0]
+            + user_answers[8 * 5 + 4]
+            + user_answers[8 * 6 + 5]
+        )
+        quiz.ri = (
+            user_answers[5]
+            + user_answers[8 + 7]
+            + user_answers[8 * 2 + 1]
+            + user_answers[8 * 3 + 3]
+            + user_answers[8 * 4 + 6]
+            + user_answers[8 * 5 + 0]
+            + user_answers[8 * 6 + 2]
+        )
+        quiz.me = (
+            user_answers[4]
+            + user_answers[8 + 3]
+            + user_answers[8 * 2 + 2]
+            + user_answers[8 * 3 + 4]
+            + user_answers[8 * 4 + 2]
+            + user_answers[8 * 5 + 2]
+            + user_answers[8 * 6 + 1]
+        )
+        quiz.imp = (
+            user_answers[0]
+            + user_answers[8 + 6]
+            + user_answers[8 * 2 + 4]
+            + user_answers[8 * 3 + 0]
+            + user_answers[8 * 4 + 3]
+            + user_answers[8 * 5 + 7]
+            + user_answers[8 * 6 + 0]
+        )
+        quiz.tw = (
+            user_answers[7]
+            + user_answers[8 + 2]
+            + user_answers[8 * 2 + 7]
+            + user_answers[8 * 3 + 7]
+            + user_answers[8 * 4 + 1]
+            + user_answers[8 * 5 + 6]
+            + user_answers[8 * 6 + 7]
+        )
+        quiz.cf = (
+            user_answers[1]
+            + user_answers[8 + 1]
+            + user_answers[8 * 2 + 0]
+            + user_answers[8 * 3 + 6]
+            + user_answers[8 * 4 + 7]
+            + user_answers[8 * 5 + 1]
+            + user_answers[8 * 6 + 3]
+        )
+
+        quiz.save()
+
+    def calculateHexacoTestResult(self, quiz: HexacoTest):
+        quiz.save()
+
     def route_calculation(self, quiz_type: str, quiz):
         logger = logging.getLogger(__name__)
         logger.warning("enterd_1")
@@ -155,6 +278,12 @@ class QuizViewSet(viewsets.ViewSet):
 
             case "AcuTest_text":
                 self.calculateAcuTestTextResult(quiz)
+
+            case "BelbinTest":
+                self.calculateBelbinTestResult(quiz)
+
+            case "HexacoTest":
+                self.calculateHexacoTestResult(quiz)
 
     def startQuiz(self, request, quiz_type):
         logger = logging.getLogger(__name__)
@@ -172,7 +301,7 @@ class QuizViewSet(viewsets.ViewSet):
 
     def submitAnswer(self, request, quiz_type):
         logger = logging.getLogger(__name__)
-        logger.warning("test")
+        logger.warning(request.data.get("answers"))
         quiz = self.get_quiz(quiz_type, request.user)
         if (
             quiz is None
@@ -182,7 +311,6 @@ class QuizViewSet(viewsets.ViewSet):
             return HttpResponse(status=400)
 
         logger.warning(request.data.get("answers"))
-        logger.warning("i was here")
         quiz.answers = request.data.get("answers")
         quiz.quiz_time.finish_time = timezone.now()
         quiz.quiz_time.save()
@@ -203,6 +331,10 @@ class QuizViewSet(viewsets.ViewSet):
                 return JsonResponse(AcuTestTextSerializer(quiz).data)
             case "ValuTest":
                 return JsonResponse(ValuTestSerializer(quiz).data)
+            case "BelbinTest":
+                return JsonResponse(BelbinTestSerializer(quiz).data)
+            case "HexacoTest":
+                return JsonResponse(HexacoTestSerializer(quiz).data)
             case _:
                 return HttpResponse(status=400)
 
