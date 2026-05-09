@@ -188,82 +188,47 @@ class QuizViewSet(viewsets.ViewSet):
         logger = logging.getLogger(__name__)
         logger.warning("enterd_3")
         user_answers = quiz.answers
-        quiz.sh = (
-            user_answers[2]
-            + user_answers[8 + 0]
-            + user_answers[8 * 2 + 6]
-            + user_answers[8 * 3 + 1]
-            + user_answers[8 * 4 + 5]
-            + user_answers[8 * 5 + 5]
-            + user_answers[8 * 6 + 4]
-        )
-        quiz.co = (
-            user_answers[6]
-            + user_answers[8 + 5]
-            + user_answers[8 * 2 + 3]
-            + user_answers[8 * 3 + 2]
-            + user_answers[8 * 4 + 4]
-            + user_answers[8 * 5 + 3]
-            + user_answers[8 * 6 + 6]
-        )
-        quiz.pl = (
-            user_answers[3]
-            + user_answers[8 + 4]
-            + user_answers[8 * 2 + 5]
-            + user_answers[8 * 3 + 5]
-            + user_answers[8 * 4 + 0]
-            + user_answers[8 * 5 + 4]
-            + user_answers[8 * 6 + 5]
-        )
-        quiz.ri = (
-            user_answers[5]
-            + user_answers[8 + 7]
-            + user_answers[8 * 2 + 1]
-            + user_answers[8 * 3 + 3]
-            + user_answers[8 * 4 + 6]
-            + user_answers[8 * 5 + 0]
-            + user_answers[8 * 6 + 2]
-        )
-        quiz.me = (
-            user_answers[4]
-            + user_answers[8 + 3]
-            + user_answers[8 * 2 + 2]
-            + user_answers[8 * 3 + 4]
-            + user_answers[8 * 4 + 2]
-            + user_answers[8 * 5 + 2]
-            + user_answers[8 * 6 + 1]
-        )
-        quiz.imp = (
-            user_answers[0]
-            + user_answers[8 + 6]
-            + user_answers[8 * 2 + 4]
-            + user_answers[8 * 3 + 0]
-            + user_answers[8 * 4 + 3]
-            + user_answers[8 * 5 + 7]
-            + user_answers[8 * 6 + 0]
-        )
-        quiz.tw = (
-            user_answers[7]
-            + user_answers[8 + 2]
-            + user_answers[8 * 2 + 7]
-            + user_answers[8 * 3 + 7]
-            + user_answers[8 * 4 + 1]
-            + user_answers[8 * 5 + 6]
-            + user_answers[8 * 6 + 7]
-        )
-        quiz.cf = (
-            user_answers[1]
-            + user_answers[8 + 1]
-            + user_answers[8 * 2 + 0]
-            + user_answers[8 * 3 + 6]
-            + user_answers[8 * 4 + 7]
-            + user_answers[8 * 5 + 1]
-            + user_answers[8 * 6 + 3]
-        )
 
+        role_patterns = {
+            "sh": [(0, 2), (1, 0), (2, 6), (3, 1), (4, 5), (5, 5), (6, 4)],
+            "co": [(0, 6), (1, 5), (2, 3), (3, 2), (4, 4), (5, 3), (6, 6)],
+            "pl": [(0, 3), (1, 4), (2, 5), (3, 5), (4, 0), (5, 4), (6, 5)],
+            "ri": [(0, 5), (1, 7), (2, 1), (3, 3), (4, 6), (5, 0), (6, 2)],
+            "me": [(0, 4), (1, 3), (2, 2), (3, 4), (4, 2), (5, 2), (6, 1)],
+            "imp": [(0, 0), (1, 6), (2, 4), (3, 0), (4, 3), (5, 7), (6, 0)],
+            "tw": [(0, 7), (1, 2), (2, 7), (3, 7), (4, 1), (5, 6), (6, 7)],
+            "cf": [(0, 1), (1, 1), (2, 0), (3, 6), (4, 7), (5, 1), (6, 3)],
+        }
+
+        for role, patterns in role_patterns.items():
+            setattr(
+                quiz,
+                role,
+                sum(user_answers[section * 8 + offset] for section, offset in patterns),
+            )
         quiz.save()
 
     def calculateHexacoTestResult(self, quiz: HexacoTest):
+        logger = logging.getLogger(__name__)
+        logger.warning("enterd_3")
+        user_answers = quiz.answers
+
+        user_results: list[float] = [0] * 31
+
+        for i in range(0, 100):
+            if conf.BELBIN_REVERSE[i]:
+                user_results[conf.BELBIN_KEY[i]] += (6 - user_answers[i]) / 4
+            else:
+                user_results[conf.BELBIN_KEY[i]] += user_answers[i] / 4
+        user_results[0] = sum(user_results[1:5]) / 4
+        user_results[5] = sum(user_results[6:10]) / 4
+        user_results[10] = sum(user_results[11:15]) / 4
+        user_results[15] = sum(user_results[16:20]) / 4
+        user_results[20] = sum(user_results[21:25]) / 4
+        user_results[25] = sum(user_results[26:30]) / 4
+
+        quiz.results = user_results
+
         quiz.save()
 
     def route_calculation(self, quiz_type: str, quiz):

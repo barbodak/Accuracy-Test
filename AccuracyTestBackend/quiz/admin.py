@@ -1,4 +1,6 @@
+import json
 import math
+from django.utils.safestring import mark_safe
 from django.contrib import admin
 from django.utils.html import format_html
 
@@ -640,6 +642,222 @@ class BelbinTestAdmin(admin.ModelAdmin):
 class HexacoTestAdmin(BaseQuizAdmin):
     list_display = ("id", "account", "created_at")
     search_fields = ("account__username", "account__email")
+    readonly_fields = ("created_at", "visualize_results")
+
+    # فیلدهایی که در فرم ادمین نمایش داده می‌شوند
+    fields = ("account", "quiz_time", "answers", "created_at", "visualize_results")
+
+    def visualize_results(self, obj):
+        from django.utils.safestring import mark_safe
+        import json
+
+        results_names = [
+            "صداقت -تواضع",
+            "خلوص",
+            "عدالت",
+            "عدم آزمندی",
+            "فروتنی",
+            "عاطفی بودن",
+            "ترس",
+            "اضطراب",
+            "وابستگی",
+            "احساساتی بودن",
+            "برون گرایی",
+            "عزت نفس اجتماعی",
+            "جسارت",
+            "اجتماعی بودن",
+            "سرزندگی",
+            "توافق",
+            "بخشندگی",
+            "ملایمت",
+            "انعطاف",
+            "صبوری",
+            "وفاداری",
+            "سازمانی",
+            "سخت کوشی",
+            "کمال گرایی",
+            "محتاط بودن",
+            "گشودگی به تجربه",
+            "درک هنری",
+            "ذکاوت",
+            "خلاقیت",
+            "نامتعارف بودن",
+            "انسان دوستی",
+        ]
+
+        if isinstance(obj.results, str):
+            try:
+                scores = [float(x.strip()) for x in obj.results.split(",") if x.strip()]
+            except ValueError:
+                return mark_safe("<p style='color: red;'>خطا در فرمت نمرات.</p>")
+        else:
+            scores = obj.results
+
+        if not scores or len(scores) != 31:
+            return mark_safe(
+                f"<p style='color: red;'>تعداد نمرات باید ۳۱ باشد. (تعداد فعلی: {len(scores) if scores else 0})</p>"
+            )
+
+        group_colors = [
+            "rgba(255, 99, 132, 0.7)",
+            "rgba(54, 162, 235, 0.7)",
+            "rgba(255, 206, 86, 0.7)",
+            "rgba(75, 192, 192, 0.7)",
+            "rgba(153, 102, 255, 0.7)",
+            "rgba(255, 159, 64, 0.7)",
+            "rgba(0, 200, 83, 0.8)",
+        ]
+
+        point_colors = []
+        for i in range(6):
+            point_colors.extend([group_colors[i]] * 5)
+        point_colors.append(group_colors[6])
+
+        # --- ۱. ساخت کانتینرهای نمودار ---
+        html_charts = """
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+        <div style="max-width: 1000px; margin: 0 auto; color: var(--body-fg, #333);">
+            <h3 style="text-align: center; color: var(--body-fg, #333); margin-bottom: 10px;">نمودار میله‌ای کلی (۳۱ ویژگی)</h3>
+            <canvas id="mainBarChart" height="200"></canvas>
+            
+            <hr style="margin: 40px 0; border-color: var(--border-color, #ccc);">
+            
+            <h3 style="text-align: center; color: var(--body-fg, #333); margin-bottom: 20px;">نمودارهای گروهی (۶ گروه ۵ نقطه‌ای)</h3>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; width: 100%; gap: 20px;">
+        """
+
+        group_titles = [
+            "صداقت-تواضع",
+            "عاطفی بودن",
+            "برون گرایی",
+            "توافق",
+            "وظیفه شناسی",
+            "گشودگی به تجربه",
+        ]
+        for i in range(6):
+            html_charts += f"""
+                <div style="width: 30%; min-width: 250px; text-align: center; margin-bottom: 20px;">
+                    <h4 style="color: var(--body-fg, #333); margin-bottom: 5px;">{group_titles[i]}</h4>
+                    <canvas id="spiderChart_{i}"></canvas>
+                </div>
+            """
+        html_charts += "</div></div>"
+
+        # --- ۲. ساخت جدول ---
+        table_rows = ""
+        for name, score, color in zip(results_names, scores, point_colors):
+            bg_color = color.replace("0.7", "0.2").replace("0.8", "0.2")
+            table_rows += f"""
+                <tr style="background-color: {bg_color}; border-bottom: 1px solid var(--border-color, #ccc);">
+                    <td style="padding: 8px;">{name}</td>
+                    <td style="padding: 8px; text-align: center; font-weight: bold;">{score}</td>
+                </tr>
+            """
+
+        html_table = f"""
+        <div style="max-width: 500px; margin: 40px auto; color: var(--body-fg, #333);">
+            <h3 style="color: var(--body-fg, #333); text-align: center;">جدول نمرات</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; text-align: center;">
+                <thead>
+                    <tr style="background-color: var(--selected-bg, #f8f8f8); border-bottom: 2px solid var(--border-color, #ccc);">
+                        <th style="padding: 8px;">ویژگی</th>
+                        <th style="padding: 8px;">نمره</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {table_rows}
+                </tbody>
+            </table>
+        </div>
+        """
+
+        # --- ۳. کدهای جاوااسکریپت ---
+        js_code = f"""
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {{
+                const resultsNames = {json.dumps(results_names)};
+                const scores = {json.dumps(scores)};
+                const pointColors = {json.dumps(point_colors)};
+                const groupColors = {json.dumps(group_colors)};
+                
+                const textColor = getComputedStyle(document.body).getPropertyValue('--body-fg').trim() || '#333';
+                const gridColor = getComputedStyle(document.body).getPropertyValue('--border-color').trim() || '#ccc';
+
+                Chart.defaults.color = textColor;
+                Chart.defaults.font.family = 'tahoma, sans-serif';
+
+                // نمودار میله ای افقی
+                new Chart(document.getElementById('mainBarChart').getContext('2d'), {{
+                    type: 'bar',
+                    data: {{
+                        labels: resultsNames,
+                        datasets: [{{
+                            label: 'نمره',
+                            data: scores,
+                            backgroundColor: pointColors,
+                            borderWidth: 1
+                        }}]
+                    }},
+                    options: {{
+                        indexAxis: 'y',
+                        responsive: true,
+                        scales: {{
+                            x: {{ 
+                                beginAtZero: true,
+                                max: 5,
+                                grid: {{ color: gridColor }}
+                            }},
+                            y: {{
+                                grid: {{ display: false }}
+                            }}
+                        }},
+                        plugins: {{ legend: {{ display: false }} }}
+                    }}
+                }});
+
+                // نمودارهای عنکبوتی (بدون maintainAspectRatio: false تا سایز یکنواخت بماند)
+                const commonRadarOptions = {{
+                    responsive: true,
+                    scales: {{
+                        r: {{
+                            beginAtZero: true,
+                            max: 5,
+                            pointLabels: {{
+                                color: textColor,
+                                font: {{ size: 11 }}
+                            }},
+                            grid: {{ color: gridColor }},
+                            angleLines: {{ color: gridColor }},
+                            ticks: {{ display: false }}
+                        }}
+                    }},
+                    plugins: {{ legend: {{ display: false }} }}
+                }};
+
+                for(let i=0; i<6; i++) {{
+                    new Chart(document.getElementById('spiderChart_'+i).getContext('2d'), {{
+                        type: 'radar',
+                        data: {{
+                            labels: resultsNames.slice(i*5, (i+1)*5),
+                            datasets: [{{
+                                label: 'نمره',
+                                data: scores.slice(i*5, (i+1)*5),
+                                backgroundColor: groupColors[i].replace('0.7', '0.2'),
+                                borderColor: groupColors[i].replace('0.7', '1'),
+                                borderWidth: 2,
+                                pointBackgroundColor: groupColors[i].replace('0.7', '1')
+                            }}]
+                        }},
+                        options: commonRadarOptions
+                    }});
+                }}
+            }});
+        </script>
+        """
+
+        return mark_safe(html_charts + html_table + js_code)
+
+    visualize_results.short_description = "تحلیل و نمودار نتایج"
 
 
 # Customize admin site header

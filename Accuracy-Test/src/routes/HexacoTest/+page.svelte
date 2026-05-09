@@ -1,5 +1,6 @@
 <script lang="ts">
     import { hexacoQuestions } from "$lib/hexaco-data";
+    import { submitAnswer } from "$lib/utils/api/quiz-apis";
     import { fly, fade } from "svelte/transition";
 
     let currentIndex = 0;
@@ -79,11 +80,9 @@
         isSubmitting = true;
         const payload = {
             quiz_type: "HexacoTest",
-            answers: hexacoQuestions.map((q) => ({
-                question_id: q.id,
-                score: answers[q.id],
-            })),
+            answers: Object.values(answers),
         };
+        await submitAnswer(payload);
         console.log("Submitting:", payload);
         alert("آزمون با موفقیت ثبت شد!");
         isSubmitting = false;

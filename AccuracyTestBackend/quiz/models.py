@@ -167,7 +167,13 @@ class HexacoTest(models.Model):
         blank=True,
         related_name="hexacotest",
     )
+
     created_at = models.DateTimeField(auto_now_add=True)  # Good to track
+    results = ArrayField(
+        models.FloatField(default=0.0),
+        size=31,
+        default=list,
+    )
 
     class Meta:
         verbose_name = "Hexaco Test"
