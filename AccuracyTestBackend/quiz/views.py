@@ -21,6 +21,7 @@ from .models import (
     ValuTest,
     BelbinTest,
     HexacoTest,
+    ThinkTest,
 )
 from .serializers import (
     AcuTestPicSerializer,
@@ -31,6 +32,7 @@ from .serializers import (
     ValuTestAnswerSerializer,
     BelbinTestSerializer,
     HexacoTestSerializer,
+    ThinkTestSerializer,
 )
 import logging
 
@@ -41,7 +43,15 @@ class QuizViewSet(viewsets.ViewSet):
 
     def get_quiz(
         self, quiz_type, user
-    ) -> AcuTest_pic | AcuTest_text | ValuTest | BelbinTest | HexacoTest | None:
+    ) -> (
+        AcuTest_pic
+        | AcuTest_text
+        | ValuTest
+        | BelbinTest
+        | HexacoTest
+        | ThinkTest
+        | None
+    ):
         acc = Account.objects.get(user=user)
         logger = logging.getLogger(__name__)
         logger.warning(acc)
@@ -66,6 +76,10 @@ class QuizViewSet(viewsets.ViewSet):
                 if acc.hexacoTest_permission is False:
                     return None
                 quiz = HexacoTest.objects.get(account=acc)
+            case "ThinkTest":
+                if acc.thinkTest_permission is False:
+                    return None
+                quiz = ThinkTest.objects.get(account=acc)
             case _:  # Default case for unmatched quiz_type
                 raise ValueError(f"Unrecognized quiz type: {quiz_type}")
         logger.warning(quiz)
@@ -108,6 +122,14 @@ class QuizViewSet(viewsets.ViewSet):
                 if (
                     (timezone.now() - quiz.quiz_time.start_time).seconds
                     > conf.HEXACO_TIMELIMIT_SECONDS
+                    or quiz.quiz_time.finish_time is not None
+                ):
+                    logger.warning("ITS FINISHED")
+                    return True
+            case "ThinkTest":
+                if (
+                    (timezone.now() - quiz.quiz_time.start_time).seconds
+                    > conf.THINK_TIMELIMIT_SECONDS
                     or quiz.quiz_time.finish_time is not None
                 ):
                     logger.warning("ITS FINISHED")
@@ -231,6 +253,17 @@ class QuizViewSet(viewsets.ViewSet):
 
         quiz.save()
 
+    def calculateThinkTestResult(self, quiz: HexacoTest):
+        logger = logging.getLogger(__name__)
+        logger.warning("enterd_4")
+        user_answers = quiz.answers
+        res = [0] * 5
+        for i in range(0, 80):
+            if user_answers[i] is conf.Think_TEST_RES[i]:
+                res[(i // 16)] += 1
+        quiz.results = res
+        quiz.save()
+
     def route_calculation(self, quiz_type: str, quiz):
         logger = logging.getLogger(__name__)
         logger.warning("enterd_1")
@@ -249,6 +282,9 @@ class QuizViewSet(viewsets.ViewSet):
 
             case "HexacoTest":
                 self.calculateHexacoTestResult(quiz)
+
+            case "ThinkTest":
+                self.calculateThinkTestResult(quiz)
 
     def startQuiz(self, request, quiz_type):
         logger = logging.getLogger(__name__)
@@ -300,6 +336,8 @@ class QuizViewSet(viewsets.ViewSet):
                 return JsonResponse(BelbinTestSerializer(quiz).data)
             case "HexacoTest":
                 return JsonResponse(HexacoTestSerializer(quiz).data)
+            case "ThinkTest":
+                return JsonResponse(ThinkTestSerializer(quiz).data)
             case _:
                 return HttpResponse(status=400)
 

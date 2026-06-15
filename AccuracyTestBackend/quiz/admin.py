@@ -11,6 +11,7 @@ from .models import (
     ValuTest,
     BelbinTest,
     HexacoTest,
+    ThinkTest,
 )
 
 
@@ -858,6 +859,13 @@ class HexacoTestAdmin(BaseQuizAdmin):
         return mark_safe(html_charts + html_table + js_code)
 
     visualize_results.short_description = "تحلیل و نمودار نتایج"
+
+
+@admin.register(ThinkTest)
+class ThinkTestAdmin(BaseQuizAdmin):
+    list_display = ("id", "account", "created_at")
+    search_fields = ("account__username", "account__email")
+    readonly_fields = ("created_at", "results")
 
 
 # Customize admin site header

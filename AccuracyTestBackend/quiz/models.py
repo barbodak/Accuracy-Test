@@ -183,3 +183,33 @@ class HexacoTest(models.Model):
     def __str__(self) -> str:
         start = self.quiz_time.start_time if self.quiz_time else "N/A"
         return f"{self.account} | {start}"
+
+
+class ThinkTest(models.Model):
+    account = models.ForeignKey(
+        Account, on_delete=models.CASCADE, related_name="thinktest"
+    )
+    answers = ArrayField(models.IntegerField(), size=80)
+    quiz_time = models.OneToOneField(
+        Quiztime,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="thinktest",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)  # Good to track
+    results = ArrayField(
+        models.IntegerField(default=0.0),
+        size=5,
+        default=list,
+    )
+
+    class Meta:
+        verbose_name = "Think Test"
+        verbose_name_plural = "Think Tests"
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        start = self.quiz_time.start_time if self.quiz_time else "N/A"
+        return f"{self.account} | {start}"

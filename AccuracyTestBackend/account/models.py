@@ -59,6 +59,7 @@ class Account(models.Model):
     valuTest_permission = models.BooleanField(editable=True, default=False)
     belbinTest_permission = models.BooleanField(editable=True, default=False)
     hexacoTest_permission = models.BooleanField(editable=True, default=False)
+    thinkTest_permission = models.BooleanField(editable=True, default=False)
 
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name}"

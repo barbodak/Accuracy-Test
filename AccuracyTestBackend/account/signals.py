@@ -9,6 +9,7 @@ from quiz.models import (
     ValuTest,
     BelbinTest,
     HexacoTest,
+    ThinkTest,
 )
 
 import logging
@@ -30,6 +31,10 @@ def create_related_quizzes(sender, instance, created, **kwargs):
     if not HexacoTest.objects.filter(account=instance).exists():
         q1 = Quiztime.objects.create()
         HexacoTest.objects.create(account=instance, quiz_time=q1, answers=[0] * 100)
+
+    if not ThinkTest.objects.filter(account=instance).exists():
+        q1 = Quiztime.objects.create()
+        ThinkTest.objects.create(account=instance, quiz_time=q1, answers=[0] * 100)
     if created:
         # This code will now only run ONCE when a new Account is made.
         if not ValuTest.objects.filter(account=instance).exists():

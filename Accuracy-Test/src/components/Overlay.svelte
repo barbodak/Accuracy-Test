@@ -1,6 +1,7 @@
 <script lang="ts">
     export let canBeExited: boolean;
     export let isTransparent: boolean;
+    export let isTransparentMain: boolean;
 </script>
 
 <div
@@ -11,8 +12,9 @@
 >
     <div class="relative flex flex-col justify-center items-center max-w-lg">
         <div
-            class={"bg-slate-800 text-white rounded-lg shadow-2xl flex flex-col justify-center items-center max-w-lg" +
-                (canBeExited ? "" : " px-8 py-5")}
+            class={"text-white rounded-lg flex flex-col justify-center items-center max-w-lg" +
+                (canBeExited ? "" : " px-8 py-5") +
+                (isTransparentMain ? "" : " bg-slate-800 shadow-2xl ")}
         >
             <slot />
         </div>

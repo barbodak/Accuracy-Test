@@ -7,6 +7,7 @@ from .models import (
     ValuTest,
     BelbinTest,
     HexacoTest,
+    ThinkTest,
 )
 
 
@@ -84,4 +85,12 @@ class HexacoTestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HexacoTest
+        fields = ["answers", "quiz_time"]
+
+
+class ThinkTestSerializer(serializers.ModelSerializer):
+    quiz_time = serializers.SlugRelatedField(read_only=True, slug_field="start_time")
+
+    class Meta:
+        model = ThinkTest
         fields = ["answers", "quiz_time"]

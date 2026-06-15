@@ -50,6 +50,10 @@
             quiz_type: "AcuTest_text",
         });
     }
+    async function endQuiz() {
+        await handleSubmit();
+        goto("/AcuTest/Pic/start");
+    }
 
     $: minutes = $timer > 0 ? Math.floor($timer / 60) : 0;
     $: seconds = $timer > 0 ? Math.floor($timer - minutes * 60) : 0;
@@ -132,7 +136,7 @@
                 </button>
                 <button
                     class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200"
-                    on:click={handleSubmit}
+                    on:click={endQuiz}
                 >
                     End Test
                 </button>

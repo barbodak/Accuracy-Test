@@ -259,7 +259,7 @@
                             >
                         {/if}
                         <div class="flex items-center gap-1.5">
-                            <span class="text-sm">تاریخ آزمون:</span>
+                            <span class="text-sm">تاریخ پرسشنامه:</span>
                             <span
                                 class="font-semibold text-base text-slate-800 dark:text-slate-200"
                                 >{jalaliDate}</span

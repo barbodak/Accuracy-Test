@@ -38,6 +38,7 @@ class AccountSerializer(serializers.ModelSerializer):
             "valuTest_permission",
             "belbinTest_permission",
             "hexacoTest_permission",
+            "thinkTest_permission",
         ]
 
         # We mark 'is_final' as read-only because views.py sets it manually
@@ -49,6 +50,7 @@ class AccountSerializer(serializers.ModelSerializer):
             "valuTest_permission",
             "belbinTest_permission",
             "hexacoTest_permission",
+            "thinkTest_permission",
         ]
 
         # Mark the writeable fields as 'required' for the finalize step

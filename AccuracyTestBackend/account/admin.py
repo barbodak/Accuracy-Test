@@ -33,6 +33,7 @@ class AccountInline(admin.StackedInline):
             "valutest_permission",
             "belbinTest_permission",
             "hexacoTest_permission",
+            "thinkTest_permission",
         ),
         "is_final",
     )
@@ -111,6 +112,7 @@ class AccountAdmin(admin.ModelAdmin):
         "valuTest_permission",
         "belbinTest_permission",
         "hexacoTest_permission",
+        "thinkTest_permission",
         "is_final",
     )
     search_fields = (
@@ -157,6 +159,7 @@ class AccountAdmin(admin.ModelAdmin):
                         "valuTest_permission",
                         "belbinTest_permission",
                         "hexacoTest_permission",
+                        "thinkTest_permission",
                     ),
                     "is_final",
                 ),
@@ -182,6 +185,8 @@ class AccountAdmin(admin.ModelAdmin):
             perms.append("🎱 bel")
         if obj.hexacoTest_permission:
             perms.append("🔮 hex")
+        if obj.thinkTest_permission:
+            perms.append("think")
         return " | ".join(perms) if perms else "❌ None"
 
     quiz_permissions.short_description = "Quiz Permissions"

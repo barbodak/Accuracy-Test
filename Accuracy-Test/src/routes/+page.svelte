@@ -52,7 +52,7 @@
             continueLink: "/ValuTest",
         },
         {
-            title: "تست Belbin",
+            title: "پرسشنامه Belbin",
             isDone: isBelbinDone,
             hasPermission: hasBelbinPerm,
             notStarted: notStartedBelbin,
@@ -60,7 +60,7 @@
             continueLink: "/BelbinTest",
         },
         {
-            title: "تست Hexaco",
+            title: "پرسشنامه Hexaco",
             isDone: isHexacoDone,
             hasPermission: hasHexacoPerm,
             notStarted: notStartedHexaco,
@@ -170,7 +170,7 @@
                 <a
                     href="/"
                     class="text-xl font-extrabold tracking-tight text-slate-800"
-                    >پلتفرم آزمون</a
+                    >پلتفرم پرسشنامه</a
                 >
             </div>
 
@@ -200,15 +200,13 @@
                 </h1>
                 <p class="text-lg text-slate-600">
                     به پنل کاربری خود خوش آمدید. برای ارزیابی و ادامه مسیر،
-                    لطفاً آزمون‌های زیر را با دقت تکمیل کنید.
+                    لطفاً پرسشنامه‌های زیر را با دقت تکمیل کنید.
                 </p>
             </div>
         </div>
 
-        <!-- گرید کارت‌های آزمون -->
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {#each tests as test}
-                <!-- شرط دسترسی اینجا قرار گرفت: کل کارت فقط در صورت داشتن دسترسی نمایش داده می‌شود -->
                 {#if test.hasPermission}
                     <div
                         class="group flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
@@ -249,14 +247,14 @@
                                     href={test.startLink}
                                     class="flex w-full justify-center rounded-xl bg-green-600 py-3 text-sm font-medium text-white shadow-md transition-all hover:bg-green-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                                 >
-                                    شروع آزمون
+                                    شروع پرسشنامه
                                 </a>
                             {:else}
                                 <a
                                     href={test.continueLink}
                                     class="flex w-full justify-center rounded-xl bg-blue-600 py-3 text-sm font-medium text-white shadow-md transition-all hover:bg-blue-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                                 >
-                                    ادامه آزمون
+                                    ادامه پرسشنامه
                                 </a>
                             {/if}
                         </div>
